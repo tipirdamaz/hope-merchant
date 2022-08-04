@@ -186,9 +186,9 @@ UINT16 dateDiff(UINT8 d1, UINT8 m1, UINT16 y1, UINT8 d2, UINT8 m2, UINT16 y2);
 
 
 /**
- * Date format mm/dd/yyyy
+ * Date format dd.mm.yyyy
  *
- * @param {char *} date     : char array (date assign as string to this variable (mm/dd/yyyy))
+ * @param {char *} date     : char array (date assign as string to this variable (dd.mm.yyyy))
  * @param {Integer} day     : day
  * @param {Integer} mon     : month
  * @param {Integer} year    : year
