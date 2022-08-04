@@ -13,42 +13,38 @@ It allows you to draw a lotto by using the information of the past draws.
 
 # PACKAGE CONTENTS
 
-- source				: C source files
+- **source**				: C source files
 
-	- sayisal.c			: Turkey Sayisal Lotto
-	- super.c			: Turkey Super Lotto
-	- sanstopu.c		: Turkey Sans Topu Lotto
-	- eumillions.c		: EuroMillions Lotto
-	- eujackpot.c		: EuroJackpot Lotto
-	- powerball.c		: American PowerBall Lotto
-	- megamillions.c	: American MegaMillions Lotto
-
-
-- dist
-
-	- ...-win32.exe		: Windows 32 bit and 64 bit executable files.
-	- ...-win64.exe		: These files were compiled with the gcc compiler on the windows 10 operating system.
-
-	- ...-mac			: macOS executable files.
-						: These files were compiled with the gcc compiler on the macOS Mojave 10.14.6 operating system.
-
-	- ...-linux			: Linux executable files.
-						: These files were compiled with the gcc compiler on the centOS 7 Linux operating system.
-
-	- ....txt			: TXT files are statistics files containing the results of previous draws.
-						: These files must be located in the same directory as the executable files.
+	- **sayisal.c**			: Turkey Sayisal Lotto
+	- **super.c**			: Turkey Super Lotto
+	- **sanstopu.c**		: Turkey Sans Topu Lotto
+	- **eumillions.c**		: EuroMillions Lotto
+	- **eujackpot.c**		: EuroJackpot Lotto
+	- **powerball.c**		: American PowerBall Lotto
+	- **megamillions.c**		: American MegaMillions Lotto
 
 
-- DOS					: For DOS operating system. 
+- **dist**
 
-	- ....EXE			: MS-DOS executable files.
-						: These files were compiled with the 16-bit Borland Turbo C++ compiler on the MS-DOS 4.1 operating system.
+	- **...-win32.exe ...-win64.exe**	: Windows 32 bit and 64 bit executable files. These files were compiled with the gcc compiler on the windows 10 operating system.
+
+
+	- **...-mac**			: macOS executable files. These files were compiled with the gcc compiler on the macOS Mojave 10.14.6 operating system.
+
+	- **...-linux**			: Linux executable files. These files were compiled with the gcc compiler on the centOS 7 Linux operating system.
+
+	- **....txt**			: TXT files are statistics files containing the results of previous draws. These files must be located in the same directory as the executable files.
+
+
+- **DOS**				: For DOS operating system. 
+
+	- **....EXE**			: MS-DOS executable files. These files were compiled with the 16-bit Borland Turbo C++ compiler on the MS-DOS 4.1 operating system.
 
 
 
 # COMPILER AND PLATFORM
 
-###### Source files were compiled with 
+### Source files were compiled with 
 
 - gcc 11.2.0 compiler and successfuly tested on
 
@@ -63,7 +59,7 @@ It allows you to draw a lotto by using the information of the past draws.
 
 # HOW TO COMPILE FILES?
 
-- gcc sourcefile.c -o outputfile -lm
+- **gcc sourcefile.c -o outputfile -lm**
 
 
 # SCREENSHOTS
