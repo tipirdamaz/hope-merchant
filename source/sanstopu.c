@@ -1,5 +1,5 @@
 /**
- * Super Lotto Statistics and Ball Draw Algorithms
+ * SansTopu Lotto Statistics and Ball Draw Algorithms
  * Author: İbrahim Tıpırdamaz  <itipirdamaz@gmail.com>
  * Copyright 2022
 */
@@ -53,11 +53,12 @@
 #endif
 
 
-#define TOTAL_BALL 60			    // total ball count
-#define DRAW_BALL 6		            // number of balls to be drawn
+#define TOTAL_BALL 34			    // total ball count
+#define DRAW_BALL 5		            // number of balls to be drawn
+#define TOTAL_BALL_PN 14		    // total plus number count
 
 
-#define FILESTATS "super.txt"       // statistics file (winning numbers)
+#define FILESTATS "sanstopu.txt"	// statistics file (winning numbers, plus numbers)
 #define OUTPUTFILE "output.txt"     // file to write results
 
 
@@ -134,6 +135,7 @@ struct ListXY {			/* 2 dimensions List. Multi draw (coupon or drawn balls from f
 /* Drawn balls lists from file has been drawn so far */
 
 struct ListXY *winningDrawnBallsList = NULL;
+struct ListXY *plusNumberDrawnBallsList = NULL;
 UINT16 fileStatRows = 0;
 
 
@@ -145,6 +147,7 @@ char dateStart[11], dateEnd[11];
 /* How many times were the winning numbers drawn in the previous draws? */
 
 struct ListX2 *winningBallStats = NULL;
+struct ListX2 *plusNumberBallStats = NULL;
 
 
 /* Numbers that drawn together (how many times the numbers drawn together) */
@@ -160,7 +163,6 @@ UINT32 match2comb = 0;
 UINT32 match3comb = 0;
 UINT32 match4comb = 0;
 UINT32 match5comb = 0;
-UINT32 match6comb = 0;
 
 
 
@@ -505,17 +507,6 @@ int seqSearchX5(struct ListX *pl, UINT8 *keys);
 
 
 
-/** 
- * Searches for 6 key (ball number) from the list.
- *
- * @param {struct ListX *}          : refers to a ball list
- * @param {unsigned char *} keys    : keys (ball numbers) to be search
- * @return {Integer}                : It returns the index of the number if it finds it, or -1 if it doesn't.
- */
-int seqSearchX6(struct ListX *pl, UINT8 *keys);
-
-
-
 /**
  * Searches for 2 key (ball number) from the 2 dimensions list.
  * 
@@ -689,19 +680,20 @@ void printListXByKey(struct ListX *pl, UINT8 printTo, FILE *fp);
 
 
 /** 
- * print ListXY By Key
+ * print ListXY With PlusNumber ByKey
  * Print keys of the items (row by row) in the 2 dimensions lists
  * 
  * @param {struct ListXY *}    : refers to 2 dimensions ball list (winning numbers)
+ * @param {struct ListXY *}    : refers to 2 dimensions ball list (plusNumber)
  * @param {FILE *} fp          : refers to output file. If fp != NULL print to output file
  */
-void printListXYByKey(struct ListXY *pl, FILE *fp);
+void printListXYWithPNByKey(struct ListXY *pl1, struct ListXY *pl2, FILE *fp);
 
 
 
 /** 
  * How many times the balls has been drawn so far 
- * (assign value to winningBallStats global variable)
+ * (assign values to winningBallStats and plusNumberBallStats global variables)
  * 
  */
 void getDrawnBallsStats();
@@ -881,28 +873,6 @@ UINT8 findComb(struct ListX *drawnBalls, UINT8 comb);
 
 
 
-/** 
- * The search6CombXY function searches for 6 combinations in all previous draws (searches in 2 dimensions list). 
- * 
- * @param {struct ListXY *} prvDrawnsList : refers to the balls has been drawn so far. 
- * @param {struct ListX *} drawnBalls     : refers to balls drawn in a new draw. 
- * @return {Integer}                      : Returns 1 if found, 0 if not. 
- */
-UINT8 search6CombXY(struct ListXY *prvDrawnsList, struct ListX *drawnBalls);
-
-
-
-/** 
- * The search6CombX function searches for 6 combinations in a previous draws (searches in 1 dimension list). 
- * 
- * @param {struct ListX *} aPrvDrawn      : refers to a drawn balls in the previous draws.
- * @param {struct ListX *} drawnBalls     : refers to balls drawn in a new draw. 
- * @return {Integer}                      : Returns 1 if found, 0 if not. 
- */
-UINT8 search6CombX(struct ListX *aPrvDrawn, struct ListX *drawnBalls);
-
-
-
 /**
  * The search5CombXY function searches for 5 combinations in all previous draws. 
  * 
@@ -915,14 +885,13 @@ UINT8 search5CombXY(struct ListXY *prvDrawnsList, struct ListX *drawnBalls);
 
 
 /** 
- * The search5CombX function searches for 5 combinations in a previous draw. 
+ * The search5CombX function searches for 5 combinations in a previous draw.
  * 
  * @param {struct ListX *} aPrvDrawn      : refers to a drawn balls in the previous draws.
  * @param {struct ListX *} drawnBalls     : refers to balls drawn in a new draw. 
- * @param {char *} buf                    : If this parameter is not set to NULL, matching combinations are assigned to this address as string
- * @return {Integer}                      : Returns 1 if found, 0 if not. 
+ * @return {Integer}                      : Returns 1 if found, 0 if not.
  */
-UINT8 search5CombX(struct ListX *aPrvDrawn, struct ListX *drawnBalls, char *buf);
+UINT8 search5CombX(struct ListX *aPrvDrawn, struct ListX *drawnBalls);
 
 
 
@@ -1003,7 +972,7 @@ UINT8 search2CombX(struct ListX *aPrvDrawn, struct ListX *drawnBalls, struct Lis
  *
  * @param {struct ListXY *} couponList    : refers to the balls has been new drawns. 
  * @param {struct ListX *} drawnBalls     : refers to balls drawn in a new draw. 
- * @param {Integer} drawBallCount     	  : DRAW_BALL for normal ball list or 1 for superStar list (coupon column count)
+ * @param {Integer} drawBallCount     	  : DRAW_BALL for normal ball list or 1 for plusNumber list (coupon column count)
  * @return {Integer}                      : Returns 1 if found, 0 if not.
  */
 UINT8 search1BallXY(struct ListXY *couponList, struct ListX *drawnBalls, UINT8 drawBallCount);
@@ -1033,7 +1002,6 @@ void calcMatchCombCount();
  *                            If 3, it prints matching triple combinations along with their dates
  *                            If 4, it prints matching quartet combinations along with their dates
  *                            If 5, it prints matching quintuple combinations along with their dates
- *                            If 6, it prints matching six combinations along with their dates
  * @param {FILE *} fp       : refers to output file. If fp != NULL print to output file
 */
 void calcCombMatch(UINT8 comb, FILE *fp);
@@ -1107,12 +1075,13 @@ void drawBalls(struct ListXY *coupon, UINT8 totalBall, UINT8 drawBallCount, UINT
 
 /** 
  * Get drawn balls lists from file has been drawn so far
- * The lists is assigned to the global variable winningDrawnBallsList
+ * The lists is assigned to the global variables winningDrawnBallsList or plusNumberDrawnBallsList
  * 
- * @param {char *}           : Drawn list file
+ * @param {struct ListXY *}      : refer to 2 dimensions list of winning numbers (winningDrawnBallsList or plusNumberDrawnBallsList)
+ * @param {char *}               : Drawn list file
  * @return {Integer}		 : returns 0 if fileName or record not found, otherwise returns the number of records.
  */
-UINT16 getDrawnBallsList(char *fileName);
+UINT16 getDrawnBallsList(struct ListXY *ballList, char *fileName);
 
 
 
@@ -1553,27 +1522,6 @@ int seqSearchX5(struct ListX *pl, UINT8 *keys)
 
 
 
-int seqSearchX6(struct ListX *pl, UINT8 *keys)
-{
-	UINT8 found=0;
-	UINT8 i;
-
-	for (i=0; i < pl->index -5; i++) 
-	{
-		if (pl->balls[i] == keys[0]) found++;
-		if (pl->balls[i+1] == keys[1]) found++;
-		if (pl->balls[i+2] == keys[2]) found++;
-		if (pl->balls[i+3] == keys[3]) found++;
-		if (pl->balls[i+4] == keys[4]) found++;
-		if (pl->balls[i+5] == keys[5]) found++;
-		if (found == 6) return i;
-	}
-
-	return -1;
-}
-
-
-
 int seqSearchXY2(struct ListXY *pl, UINT8 *keys)
 {
 	struct ListX *tmp = pl->list;
@@ -1865,34 +1813,43 @@ void printListXByKey(struct ListX *pl, UINT8 printTo, FILE *fp)
 
 
 
-void printListXYByKey(struct ListXY *pl, FILE *fp)
+void printListXYWithPNByKey(struct ListXY *pl1, struct ListXY *pl2, FILE *fp)
 {
-	struct ListX *nl = pl->list;
+	struct ListX *nl1 = pl1->list;
+	struct ListX *nl2 = pl2->list;
 	char ioBuf[60];
 	char buf[30];
 	UINT8 i, j;
 
-	puts("     Numbers                   \n");
-	if (fp != NULL) fputs("     Numbers                   \n\n", fp);
+	puts("     Numbers       + Number\n");
+	if (fp != NULL) fputs("     Numbers       + Number\n\n", fp);
 
-	for (i=1; (nl); i++)
+	for (i=1; (nl1) && (nl2); i++)
 	{
 		ioBuf[0] = '\0';
 
 		sprintf(buf, "%2d - ", i);
 		strcat(ioBuf, buf);
 
-		for (j=0; j < nl->index; j++) {
-			sprintf(buf, "%2d ", nl->balls[j]);
+		for (j=0; j < nl1->index; j++) {
+			sprintf(buf, "%2d ", nl1->balls[j]);
 			strcat(ioBuf, buf);
 		}
 
-		if (nl->label) {
-			sprintf(buf, "   %s", nl->label);
+		strcat(ioBuf, "  ");
+
+		for (j=0; j < nl2->index; j++) {
+			sprintf(buf, "%2d ", nl2->balls[j]);
 			strcat(ioBuf, buf);
 		}
 
-		nl = nl->next;
+		if (nl1->label) {
+			sprintf(buf, "     %s", nl1->label);
+			strcat(ioBuf, buf);
+		}
+
+		nl1 = nl1->next;
+		nl2 = nl2->next;
 
 		strcat(ioBuf, "\n");
 
@@ -2021,7 +1978,6 @@ UINT8 findComb(struct ListX *drawnBalls, UINT8 comb)
 	case 3 : found = search3CombXY(winningDrawnBallsList, drawnBalls); break;
 	case 4 : found = search4CombXY(winningDrawnBallsList, drawnBalls); break;
 	case 5 : found = search5CombXY(winningDrawnBallsList, drawnBalls); break;
-	case 6 : found = search6CombXY(winningDrawnBallsList, drawnBalls); break;
 	default: break;
 	}
 
@@ -2030,7 +1986,7 @@ UINT8 findComb(struct ListX *drawnBalls, UINT8 comb)
 
 
 
-UINT8 search6CombXY(struct ListXY *prvDrawnsList, struct ListX *drawnBalls)
+UINT8 search5CombXY(struct ListXY *prvDrawnsList, struct ListX *drawnBalls)
 {
 	UINT16 i, listRows;
 	UINT8 balls[DRAW_BALL+1];
@@ -2046,7 +2002,7 @@ UINT8 search6CombXY(struct ListXY *prvDrawnsList, struct ListX *drawnBalls)
 	{
 		aPrvDrawn = getListXByIndex(prvDrawnsList, i);
 
-		if (seqSearchX6(aPrvDrawn, balls) >= 0) {found=1; break;}
+		if (seqSearchX5(aPrvDrawn, balls) >= 0) {found=1; break;}
 	}
 
 	return found;
@@ -2054,205 +2010,14 @@ UINT8 search6CombXY(struct ListXY *prvDrawnsList, struct ListX *drawnBalls)
 
 
 
-UINT8 search6CombX(struct ListX *aPrvDrawn, struct ListX *drawnBalls)
+UINT8 search5CombX(struct ListX *aPrvDrawn, struct ListX *drawnBalls)
 {
 	UINT8 balls[DRAW_BALL+1];
 	UINT8 found = 0;
 
 	getKeys(drawnBalls, balls, 0, 0);
 
-	if (seqSearchX6(aPrvDrawn, balls) >= 0) found=1;
-
-	return found;
-}
-
-
-
-UINT8 search5CombXY(struct ListXY *prvDrawnsList, struct ListX *drawnBalls)
-{
-	UINT16 i, listRows;
-	UINT8 b1[DRAW_BALL+1];
-	UINT8 b2[6];
-	struct ListX *aPrvDrawn = NULL;
-	UINT8 found = 0;
-
-	if (prvDrawnsList == winningDrawnBallsList) listRows = fileStatRows;
-	else listRows = lengthY(prvDrawnsList);
-
-	getKeys(drawnBalls, b1, 0, drawnBalls->size);
-
-	for (i=0; i<listRows; i++)
-	{
-		aPrvDrawn = getListXByIndex(prvDrawnsList, i);
-
-		b2[0] = b1[0];
-		b2[1] = b1[1];
-		b2[2] = b1[2];
-		b2[3] = b1[3];
-		b2[4] = b1[4];
-		b2[5] = '\0';
-
-		if (seqSearchX4(aPrvDrawn, b2) >= 0) {found=1; break;}
-
-		b2[0] = b1[0];
-		b2[1] = b1[1];
-		b2[2] = b1[2];
-		b2[3] = b1[3];
-		b2[4] = b1[5];
-		b2[5] = '\0';
-
-		if (seqSearchX4(aPrvDrawn, b2) >= 0) {found=1; break;}
-
-		b2[0] = b1[0];
-		b2[1] = b1[1];
-		b2[2] = b1[2];
-		b2[3] = b1[4];
-		b2[4] = b1[5];
-		b2[5] = '\0';
-
-		if (seqSearchX4(aPrvDrawn, b2) >= 0) {found=1; break;}
-
-		b2[0] = b1[0];
-		b2[1] = b1[1];
-		b2[2] = b1[3];
-		b2[3] = b1[4];
-		b2[4] = b1[5];
-		b2[5] = '\0';
-
-		if (seqSearchX4(aPrvDrawn, b2) >= 0) {found=1; break;}
-
-		b2[0] = b1[0];
-		b2[1] = b1[2];
-		b2[2] = b1[3];
-		b2[3] = b1[4];
-		b2[4] = b1[5];
-		b2[5] = '\0';
-
-		if (seqSearchX4(aPrvDrawn, b2) >= 0) {found=1; break;}
-
-		b2[0] = b1[1];
-		b2[1] = b1[2];
-		b2[2] = b1[3];
-		b2[3] = b1[4];
-		b2[4] = b1[5];
-		b2[5] = '\0';
-
-		if (seqSearchX4(aPrvDrawn, b2) >= 0) {found=1; break;}
-	}
-
-	return found;
-}
-
-
-
-UINT8 search5CombX(struct ListX *aPrvDrawn, struct ListX *drawnBalls, char *buf)
-{
-	struct ListX *lb = NULL;
-	int index;
-	UINT8 b1[DRAW_BALL+1];
-	UINT8 b2[6];
-	UINT8 found = 0;
-	char fStr[14];
-
-	getKeys(drawnBalls, b1, 0, drawnBalls->size);
-
-	if (buf) buf[0] = '\0';
-
-	b2[0] = b1[0];
-	b2[1] = b1[1];
-	b2[2] = b1[2];
-	b2[3] = b1[3];
-	b2[4] = b1[4];
-	b2[5] = '\0';
-
-	if (seqSearchX4(aPrvDrawn, b2) >= 0)
-	{
-		if (buf) {
-			sprintf(fStr, "(%2d,%2d,%2d,%2d,%2d)", b1[0], b1[1], b1[2], b1[3], b1[4]);
-			strcat(buf, fStr);
-		}
-		found=1;
-	}
-
-	b2[0] = b1[0];
-	b2[1] = b1[1];
-	b2[2] = b1[2];
-	b2[3] = b1[3];
-	b2[4] = b1[5];
-	b2[5] = '\0';
-
-	if (seqSearchX4(aPrvDrawn, b2) >= 0)
-	{
-		if (buf) {
-			sprintf(fStr, "(%2d,%2d,%2d,%2d,%2d)", b1[0], b1[1], b1[2], b1[3], b1[5]);
-			strcat(buf, fStr);
-		}
-		found=1;
-	}
-
-	b2[0] = b1[0];
-	b2[1] = b1[1];
-	b2[2] = b1[2];
-	b2[3] = b1[4];
-	b2[4] = b1[5];
-	b2[5] = '\0';
-
-	if (seqSearchX4(aPrvDrawn, b2) >= 0)
-	{
-		if (buf) {
-			sprintf(fStr, "(%2d,%2d,%2d,%2d,%2d)", b1[0], b1[1], b1[2], b1[4], b1[5]);
-			strcat(buf, fStr);
-		}
-		found=1;
-	}
-
-	b2[0] = b1[0];
-	b2[1] = b1[1];
-	b2[2] = b1[3];
-	b2[3] = b1[4];
-	b2[4] = b1[5];
-	b2[5] = '\0';
-
-	if (seqSearchX4(aPrvDrawn, b2) >= 0)
-	{
-		if (buf) {
-			sprintf(fStr, "(%2d,%2d,%2d,%2d,%2d)", b1[0], b1[1], b1[3], b1[4], b1[5]);
-			strcat(buf, fStr);
-		}
-		found=1;
-	}
-
-	b2[0] = b1[0];
-	b2[1] = b1[2];
-	b2[2] = b1[3];
-	b2[3] = b1[4];
-	b2[4] = b1[5];
-	b2[5] = '\0';
-
-	if (seqSearchX4(aPrvDrawn, b2) >= 0)
-	{
-		if (buf) {
-			sprintf(fStr, "(%2d,%2d,%2d,%2d,%2d)", b1[0], b1[2], b1[3], b1[4], b1[5]);
-			strcat(buf, fStr);
-		}
-		found=1;
-	}
-
-	b2[0] = b1[1];
-	b2[1] = b1[2];
-	b2[2] = b1[3];
-	b2[3] = b1[4];
-	b2[4] = b1[5];
-	b2[5] = '\0';
-
-	if (seqSearchX4(aPrvDrawn, b2) >= 0)
-	{
-		if (buf) {
-			sprintf(fStr, "(%2d,%2d,%2d,%2d,%2d)", b1[1], b1[2], b1[3], b1[4], b1[5]);
-			strcat(buf, fStr);
-		}
-		found=1;
-	}
+	if (seqSearchX5(aPrvDrawn, balls) >= 0) found=1;
 
 	return found;
 }
@@ -2294,32 +2059,8 @@ UINT8 search4CombXY(struct ListXY *prvDrawnsList, struct ListX *drawnBalls)
 
 		b2[0] = b1[0];
 		b2[1] = b1[1];
-		b2[2] = b1[2];
-		b2[3] = b1[5];
-		b2[4] = '\0';
-
-		if (seqSearchX4(aPrvDrawn, b2) >= 0) {found=1; break;}
-
-		b2[0] = b1[0];
-		b2[1] = b1[1];
 		b2[2] = b1[3];
 		b2[3] = b1[4];
-		b2[4] = '\0';
-
-		if (seqSearchX4(aPrvDrawn, b2) >= 0) {found=1; break;}
-
-		b2[0] = b1[0];
-		b2[1] = b1[1];
-		b2[2] = b1[3];
-		b2[3] = b1[5];
-		b2[4] = '\0';
-
-		if (seqSearchX4(aPrvDrawn, b2) >= 0) {found=1; break;}
-
-		b2[0] = b1[0];
-		b2[1] = b1[1];
-		b2[2] = b1[4];
-		b2[3] = b1[5];
 		b2[4] = '\0';
 
 		if (seqSearchX4(aPrvDrawn, b2) >= 0) {found=1; break;}
@@ -2332,66 +2073,10 @@ UINT8 search4CombXY(struct ListXY *prvDrawnsList, struct ListX *drawnBalls)
 
 		if (seqSearchX4(aPrvDrawn, b2) >= 0) {found=1; break;}
 
-		b2[0] = b1[0];
-		b2[1] = b1[2];
-		b2[2] = b1[3];
-		b2[3] = b1[5];
-		b2[4] = '\0';
-
-		if (seqSearchX4(aPrvDrawn, b2) >= 0) {found=1; break;}
-
-		b2[0] = b1[0];
-		b2[1] = b1[2];
-		b2[2] = b1[4];
-		b2[3] = b1[5];
-		b2[4] = '\0';
-
-		if (seqSearchX4(aPrvDrawn, b2) >= 0) {found=1; break;}
-
-		b2[0] = b1[0];
-		b2[1] = b1[3];
-		b2[2] = b1[4];
-		b2[3] = b1[5];
-		b2[4] = '\0';
-
-		if (seqSearchX4(aPrvDrawn, b2) >= 0) {found=1; break;}
-
 		b2[0] = b1[1];
 		b2[1] = b1[2];
 		b2[2] = b1[3];
 		b2[3] = b1[4];
-		b2[4] = '\0';
-
-		if (seqSearchX4(aPrvDrawn, b2) >= 0) {found=1; break;}
-
-		b2[0] = b1[1];
-		b2[1] = b1[2];
-		b2[2] = b1[3];
-		b2[3] = b1[5];
-		b2[4] = '\0';
-
-		if (seqSearchX4(aPrvDrawn, b2) >= 0) {found=1; break;}
-
-		b2[0] = b1[1];
-		b2[1] = b1[2];
-		b2[2] = b1[4];
-		b2[3] = b1[5];
-		b2[4] = '\0';
-
-		if (seqSearchX4(aPrvDrawn, b2) >= 0) {found=1; break;}
-
-		b2[0] = b1[1];
-		b2[1] = b1[3];
-		b2[2] = b1[4];
-		b2[3] = b1[5];
-		b2[4] = '\0';
-
-		if (seqSearchX4(aPrvDrawn, b2) >= 0) {found=1; break;}
-
-		b2[0] = b1[2];
-		b2[1] = b1[3];
-		b2[2] = b1[4];
-		b2[3] = b1[5];
 		b2[4] = '\0';
 
 		if (seqSearchX4(aPrvDrawn, b2) >= 0) {found=1; break;}
@@ -2424,7 +2109,6 @@ UINT8 search4CombX(struct ListX *aPrvDrawn, struct ListX *drawnBalls, struct Lis
 	if (seqSearchX4(aPrvDrawn, b2) >= 0)
 	{
 		if (buf) {
-			if (found) strcat(buf, ", ");
 			sprintf(fStr, "(%2d,%2d,%2d,%2d)", b1[0], b1[1], b1[2], b1[3]);
 			strcat(buf, fStr);
 		}
@@ -2467,35 +2151,10 @@ UINT8 search4CombX(struct ListX *aPrvDrawn, struct ListX *drawnBalls, struct Lis
 
 	b2[0] = b1[0];
 	b2[1] = b1[1];
-	b2[2] = b1[2];
-	b2[3] = b1[5];
-	b2[4] = '\0';
-
-	if (seqSearchX4(aPrvDrawn, b2) >= 0)
-	{
-		if (buf) {
-			if (found) strcat(buf, ", ");
-			sprintf(fStr, "(%2d,%2d,%2d,%2d)", b1[0], b1[1], b1[2], b1[5]);
-			strcat(buf, fStr);
-		}
-		if (luckyBalls) {
-			if ((index = seqSearchXY4(luckyBalls, b2)) < 0) {
-				lb = createListX(lb, 4, NULL, 1, 0, 0, 0);
-				appendItems(lb, b2);
-				appendList(luckyBalls, lb);
-			} else {
-				incValXY(luckyBalls, index);
-			}
-		}
-		found=1;
-	}
-
-	b2[0] = b1[0];
-	b2[1] = b1[1];
 	b2[2] = b1[3];
 	b2[3] = b1[4];
 	b2[4] = '\0';
-
+		
 	if (seqSearchX4(aPrvDrawn, b2) >= 0)
 	{
 		if (buf) {
@@ -2516,141 +2175,16 @@ UINT8 search4CombX(struct ListX *aPrvDrawn, struct ListX *drawnBalls, struct Lis
 	}
 
 	b2[0] = b1[0];
-	b2[1] = b1[1];
-	b2[2] = b1[3];
-	b2[3] = b1[5];
-	b2[4] = '\0';
-
-	if (seqSearchX4(aPrvDrawn, b2) >= 0)
-	{
-		if (buf) {
-			if (found) strcat(buf, ", ");
-			sprintf(fStr, "(%2d,%2d,%2d,%2d)", b1[0], b1[1], b1[3], b1[5]);
-			strcat(buf, fStr);
-		}
-		if (luckyBalls) {
-			if ((index = seqSearchXY4(luckyBalls, b2)) < 0) {
-				lb = createListX(lb, 4, NULL, 1, 0, 0, 0);
-				appendItems(lb, b2);
-				appendList(luckyBalls, lb);
-			} else {
-				incValXY(luckyBalls, index);
-			}
-		}
-		found=1;
-	}
-
-	b2[0] = b1[0];
-	b2[1] = b1[1];
-	b2[2] = b1[4];
-	b2[3] = b1[5];
-	b2[4] = '\0';
-
-	if (seqSearchX4(aPrvDrawn, b2) >= 0)
-	{
-		if (buf) {
-			if (found) strcat(buf, ", ");
-			sprintf(fStr, "(%2d,%2d,%2d,%2d)", b1[0], b1[1], b1[4], b1[5]);
-			strcat(buf, fStr);
-		}
-		if (luckyBalls) {
-			if ((index = seqSearchXY4(luckyBalls, b2)) < 0) {
-				lb = createListX(lb, 4, NULL, 1, 0, 0, 0);
-				appendItems(lb, b2);
-				appendList(luckyBalls, lb);
-			} else {
-				incValXY(luckyBalls, index);
-			}
-		}
-		found=1;
-	}
-
-	b2[0] = b1[0];
 	b2[1] = b1[2];
 	b2[2] = b1[3];
 	b2[3] = b1[4];
 	b2[4] = '\0';
-
+		
 	if (seqSearchX4(aPrvDrawn, b2) >= 0)
 	{
 		if (buf) {
 			if (found) strcat(buf, ", ");
 			sprintf(fStr, "(%2d,%2d,%2d,%2d)", b1[0], b1[2], b1[3], b1[4]);
-			strcat(buf, fStr);
-		}
-		if (luckyBalls) {
-			if ((index = seqSearchXY4(luckyBalls, b2)) < 0) {
-				lb = createListX(lb, 4, NULL, 1, 0, 0, 0);
-				appendItems(lb, b2);
-				appendList(luckyBalls, lb);
-			} else {
-				incValXY(luckyBalls, index);
-			}
-		}
-		found=1;
-	}
-
-	b2[0] = b1[0];
-	b2[1] = b1[2];
-	b2[2] = b1[3];
-	b2[3] = b1[5];
-	b2[4] = '\0';
-
-	if (seqSearchX4(aPrvDrawn, b2) >= 0)
-	{
-		if (buf) {
-			if (found) strcat(buf, ", ");
-			sprintf(fStr, "(%2d,%2d,%2d,%2d)", b1[0], b1[2], b1[3], b1[5]);
-			strcat(buf, fStr);
-		}
-		if (luckyBalls) {
-			if ((index = seqSearchXY4(luckyBalls, b2)) < 0) {
-				lb = createListX(lb, 4, NULL, 1, 0, 0, 0);
-				appendItems(lb, b2);
-				appendList(luckyBalls, lb);
-			} else {
-				incValXY(luckyBalls, index);
-			}
-		}
-		found=1;
-	}
-
-	b2[0] = b1[0];
-	b2[1] = b1[2];
-	b2[2] = b1[4];
-	b2[3] = b1[5];
-	b2[4] = '\0';
-
-	if (seqSearchX4(aPrvDrawn, b2) >= 0)
-	{
-		if (buf) {
-			if (found) strcat(buf, ", ");
-			sprintf(fStr, "(%2d,%2d,%2d,%2d)", b1[0], b1[2], b1[4], b1[5]);
-			strcat(buf, fStr);
-		}
-		if (luckyBalls) {
-			if ((index = seqSearchXY4(luckyBalls, b2)) < 0) {
-				lb = createListX(lb, 4, NULL, 1, 0, 0, 0);
-				appendItems(lb, b2);
-				appendList(luckyBalls, lb);
-			} else {
-				incValXY(luckyBalls, index);
-			}
-		}
-		found=1;
-	}
-
-	b2[0] = b1[0];
-	b2[1] = b1[3];
-	b2[2] = b1[4];
-	b2[3] = b1[5];
-	b2[4] = '\0';
-
-	if (seqSearchX4(aPrvDrawn, b2) >= 0)
-	{
-		if (buf) {
-			if (found) strcat(buf, ", ");
-			sprintf(fStr, "(%2d,%2d,%2d,%2d)", b1[0], b1[3], b1[4], b1[5]);
 			strcat(buf, fStr);
 		}
 		if (luckyBalls) {
@@ -2676,106 +2210,6 @@ UINT8 search4CombX(struct ListX *aPrvDrawn, struct ListX *drawnBalls, struct Lis
 		if (buf) {
 			if (found) strcat(buf, ", ");
 			sprintf(fStr, "(%2d,%2d,%2d,%2d)", b1[1], b1[2], b1[3], b1[4]);
-			strcat(buf, fStr);
-		}
-		if (luckyBalls) {
-			if ((index = seqSearchXY4(luckyBalls, b2)) < 0) {
-				lb = createListX(lb, 4, NULL, 1, 0, 0, 0);
-				appendItems(lb, b2);
-				appendList(luckyBalls, lb);
-			} else {
-				incValXY(luckyBalls, index);
-			}
-		}
-		found=1;
-	}
-
-	b2[0] = b1[1];
-	b2[1] = b1[2];
-	b2[2] = b1[3];
-	b2[3] = b1[5];
-	b2[4] = '\0';
-
-	if (seqSearchX4(aPrvDrawn, b2) >= 0)
-	{
-		if (buf) {
-			if (found) strcat(buf, ", ");
-			sprintf(fStr, "(%2d,%2d,%2d,%2d)", b1[1], b1[2], b1[3], b1[5]);
-			strcat(buf, fStr);
-		}
-		if (luckyBalls) {
-			if ((index = seqSearchXY4(luckyBalls, b2)) < 0) {
-				lb = createListX(lb, 4, NULL, 1, 0, 0, 0);
-				appendItems(lb, b2);
-				appendList(luckyBalls, lb);
-			} else {
-				incValXY(luckyBalls, index);
-			}
-		}
-		found=1;
-	}
-
-	b2[0] = b1[1];
-	b2[1] = b1[2];
-	b2[2] = b1[4];
-	b2[3] = b1[5];
-	b2[4] = '\0';
-
-	if (seqSearchX4(aPrvDrawn, b2) >= 0)
-	{
-		if (buf) {
-			if (found) strcat(buf, ", ");
-			sprintf(fStr, "(%2d,%2d,%2d,%2d)", b1[1], b1[2], b1[4], b1[5]);
-			strcat(buf, fStr);
-		}
-		if (luckyBalls) {
-			if ((index = seqSearchXY4(luckyBalls, b2)) < 0) {
-				lb = createListX(lb, 4, NULL, 1, 0, 0, 0);
-				appendItems(lb, b2);
-				appendList(luckyBalls, lb);
-			} else {
-				incValXY(luckyBalls, index);
-			}
-		}
-		found=1;
-	}
-
-	b2[0] = b1[1];
-	b2[1] = b1[3];
-	b2[2] = b1[4];
-	b2[3] = b1[5];
-	b2[4] = '\0';
-
-	if (seqSearchX4(aPrvDrawn, b2) >= 0)
-	{
-		if (buf) {
-			if (found) strcat(buf, ", ");
-			sprintf(fStr, "(%2d,%2d,%2d,%2d)", b1[1], b1[3], b1[4], b1[5]);
-			strcat(buf, fStr);
-		}
-		if (luckyBalls) {
-			if ((index = seqSearchXY4(luckyBalls, b2)) < 0) {
-				lb = createListX(lb, 4, NULL, 1, 0, 0, 0);
-				appendItems(lb, b2);
-				appendList(luckyBalls, lb);
-			} else {
-				incValXY(luckyBalls, index);
-			}
-		}
-		found=1;
-	}
-
-	b2[0] = b1[2];
-	b2[1] = b1[3];
-	b2[2] = b1[4];
-	b2[3] = b1[5];
-	b2[4] = '\0';
-
-	if (seqSearchX4(aPrvDrawn, b2) >= 0)
-	{
-		if (buf) {
-			if (found) strcat(buf, ", ");
-			sprintf(fStr, "(%2d,%2d,%2d,%2d)", b1[2], b1[3], b1[4], b1[5]);
 			strcat(buf, fStr);
 		}
 		if (luckyBalls) {
@@ -2834,13 +2268,6 @@ UINT8 search3CombXY(struct ListXY *prvDrawnsList, struct ListX *drawnBalls)
 		if (seqSearchX3(aPrvDrawn, b2) >= 0) {found=1; break;}
 
 		b2[0] = b1[0];
-		b2[1] = b1[1];
-		b2[2] = b1[5];
-		b2[3] = '\0';
-
-		if (seqSearchX3(aPrvDrawn, b2) >= 0) {found=1; break;}
-
-		b2[0] = b1[0];
 		b2[1] = b1[2];
 		b2[2] = b1[3];
 		b2[3] = '\0';
@@ -2855,29 +2282,8 @@ UINT8 search3CombXY(struct ListXY *prvDrawnsList, struct ListX *drawnBalls)
 		if (seqSearchX3(aPrvDrawn, b2) >= 0) {found=1; break;}
 
 		b2[0] = b1[0];
-		b2[1] = b1[2];
-		b2[2] = b1[5];
-		b2[3] = '\0';
-
-		if (seqSearchX3(aPrvDrawn, b2) >= 0) {found=1; break;}
-
-		b2[0] = b1[0];
 		b2[1] = b1[3];
 		b2[2] = b1[4];
-		b2[3] = '\0';
-
-		if (seqSearchX3(aPrvDrawn, b2) >= 0) {found=1; break;}
-
-		b2[0] = b1[0];
-		b2[1] = b1[3];
-		b2[2] = b1[5];
-		b2[3] = '\0';
-
-		if (seqSearchX3(aPrvDrawn, b2) >= 0) {found=1; break;}
-
-		b2[0] = b1[0];
-		b2[1] = b1[4];
-		b2[2] = b1[5];
 		b2[3] = '\0';
 
 		if (seqSearchX3(aPrvDrawn, b2) >= 0) {found=1; break;}
@@ -2897,34 +2303,6 @@ UINT8 search3CombXY(struct ListXY *prvDrawnsList, struct ListX *drawnBalls)
 		if (seqSearchX3(aPrvDrawn, b2) >= 0) {found=1; break;}
 
 		b2[0] = b1[1];
-		b2[1] = b1[2];
-		b2[2] = b1[5];
-		b2[3] = '\0';
-
-		if (seqSearchX3(aPrvDrawn, b2) >= 0) {found=1; break;}
-
-		b2[0] = b1[1];
-		b2[1] = b1[3];
-		b2[2] = b1[4];
-		b2[3] = '\0';
-
-		if (seqSearchX3(aPrvDrawn, b2) >= 0) {found=1; break;}
-
-		b2[0] = b1[1];
-		b2[1] = b1[3];
-		b2[2] = b1[5];
-		b2[3] = '\0';
-
-		if (seqSearchX3(aPrvDrawn, b2) >= 0) {found=1; break;}
-
-		b2[0] = b1[1];
-		b2[1] = b1[4];
-		b2[2] = b1[5];
-		b2[3] = '\0';
-
-		if (seqSearchX3(aPrvDrawn, b2) >= 0) {found=1; break;}
-
-		b2[0] = b1[2];
 		b2[1] = b1[3];
 		b2[2] = b1[4];
 		b2[3] = '\0';
@@ -2933,21 +2311,7 @@ UINT8 search3CombXY(struct ListXY *prvDrawnsList, struct ListX *drawnBalls)
 
 		b2[0] = b1[2];
 		b2[1] = b1[3];
-		b2[2] = b1[5];
-		b2[3] = '\0';
-
-		if (seqSearchX3(aPrvDrawn, b2) >= 0) {found=1; break;}
-
-		b2[0] = b1[2];
-		b2[1] = b1[4];
-		b2[2] = b1[5];
-		b2[3] = '\0';
-
-		if (seqSearchX3(aPrvDrawn, b2) >= 0) {found=1; break;}
-
-		b2[0] = b1[3];
-		b2[1] = b1[4];
-		b2[2] = b1[5];
+		b2[2] = b1[4];
 		b2[3] = '\0';
 
 		if (seqSearchX3(aPrvDrawn, b2) >= 0) {found=1; break;}
@@ -2975,11 +2339,10 @@ UINT8 search3CombX(struct ListX *aPrvDrawn, struct ListX *drawnBalls, struct Lis
 	b2[1] = b1[1];
 	b2[2] = b1[2];
 	b2[3] = '\0';
-
+		
 	if (seqSearchX3(aPrvDrawn, b2) >= 0)
 	{
 		if (buf) {
-			if (found) strcat(buf, ", ");
 			sprintf(fStr, "(%2d,%2d,%2d)", b1[0], b1[1], b1[2]);
 			strcat(buf, fStr);
 		}
@@ -2999,7 +2362,7 @@ UINT8 search3CombX(struct ListX *aPrvDrawn, struct ListX *drawnBalls, struct Lis
 	b2[1] = b1[1];
 	b2[2] = b1[3];
 	b2[3] = '\0';
-
+		
 	if (seqSearchX3(aPrvDrawn, b2) >= 0)
 	{
 		if (buf) {
@@ -3044,34 +2407,10 @@ UINT8 search3CombX(struct ListX *aPrvDrawn, struct ListX *drawnBalls, struct Lis
 	}
 
 	b2[0] = b1[0];
-	b2[1] = b1[1];
-	b2[2] = b1[5];
-	b2[3] = '\0';
-
-	if (seqSearchX3(aPrvDrawn, b2) >= 0)
-	{
-		if (buf) {
-			if (found) strcat(buf, ", ");
-			sprintf(fStr, "(%2d,%2d,%2d)", b1[0], b1[1], b1[5]);
-			strcat(buf, fStr);
-		}
-		if (luckyBalls) {
-			if ((index = seqSearchXY3(luckyBalls, b2)) < 0) {
-				lb = createListX(lb, 3, NULL, 1, 0, 0, 0);
-				appendItems(lb, b2);
-				appendList(luckyBalls, lb);
-			} else {
-				incValXY(luckyBalls, index);
-			}
-		}
-		found=1;
-	}
-
-	b2[0] = b1[0];
 	b2[1] = b1[2];
 	b2[2] = b1[3];
 	b2[3] = '\0';
-
+		
 	if (seqSearchX3(aPrvDrawn, b2) >= 0)
 	{
 		if (buf) {
@@ -3116,87 +2455,15 @@ UINT8 search3CombX(struct ListX *aPrvDrawn, struct ListX *drawnBalls, struct Lis
 	}
 
 	b2[0] = b1[0];
-	b2[1] = b1[2];
-	b2[2] = b1[5];
-	b2[3] = '\0';
-
-	if (seqSearchX3(aPrvDrawn, b2) >= 0)
-	{
-		if (buf) {
-			if (found) strcat(buf, ", ");
-			sprintf(fStr, "(%2d,%2d,%2d)", b1[0], b1[2], b1[5]);
-			strcat(buf, fStr);
-		}
-		if (luckyBalls) {
-			if ((index = seqSearchXY3(luckyBalls, b2)) < 0) {
-				lb = createListX(lb, 3, NULL, 1, 0, 0, 0);
-				appendItems(lb, b2);
-				appendList(luckyBalls, lb);
-			} else {
-				incValXY(luckyBalls, index);
-			}
-		}
-		found=1;
-	}
-
-	b2[0] = b1[0];
 	b2[1] = b1[3];
 	b2[2] = b1[4];
 	b2[3] = '\0';
-
+		
 	if (seqSearchX3(aPrvDrawn, b2) >= 0)
 	{
 		if (buf) {
 			if (found) strcat(buf, ", ");
 			sprintf(fStr, "(%2d,%2d,%2d)", b1[0], b1[3], b1[4]);
-			strcat(buf, fStr);
-		}
-		if (luckyBalls) {
-			if ((index = seqSearchXY3(luckyBalls, b2)) < 0) {
-				lb = createListX(lb, 3, NULL, 1, 0, 0, 0);
-				appendItems(lb, b2);
-				appendList(luckyBalls, lb);
-			} else {
-				incValXY(luckyBalls, index);
-			}
-		}
-		found=1;
-	}
-
-	b2[0] = b1[0];
-	b2[1] = b1[3];
-	b2[2] = b1[5];
-	b2[3] = '\0';
-
-	if (seqSearchX3(aPrvDrawn, b2) >= 0)
-	{
-		if (buf) {
-			if (found) strcat(buf, ", ");
-			sprintf(fStr, "(%2d,%2d,%2d)", b1[0], b1[3], b1[5]);
-			strcat(buf, fStr);
-		}
-		if (luckyBalls) {
-			if ((index = seqSearchXY3(luckyBalls, b2)) < 0) {
-				lb = createListX(lb, 3, NULL, 1, 0, 0, 0);
-				appendItems(lb, b2);
-				appendList(luckyBalls, lb);
-			} else {
-				incValXY(luckyBalls, index);
-			}
-		}
-		found=1;
-	}
-
-	b2[0] = b1[0];
-	b2[1] = b1[4];
-	b2[2] = b1[5];
-	b2[3] = '\0';
-
-	if (seqSearchX3(aPrvDrawn, b2) >= 0)
-	{
-		if (buf) {
-			if (found) strcat(buf, ", ");
-			sprintf(fStr, "(%2d,%2d,%2d)", b1[0], b1[4], b1[5]);
 			strcat(buf, fStr);
 		}
 		if (luckyBalls) {
@@ -3239,36 +2506,12 @@ UINT8 search3CombX(struct ListX *aPrvDrawn, struct ListX *drawnBalls, struct Lis
 	b2[1] = b1[2];
 	b2[2] = b1[4];
 	b2[3] = '\0';
-
+		
 	if (seqSearchX3(aPrvDrawn, b2) >= 0)
 	{
 		if (buf) {
 			if (found) strcat(buf, ", ");
 			sprintf(fStr, "(%2d,%2d,%2d)", b1[1], b1[2], b1[4]);
-			strcat(buf, fStr);
-		}
-		if (luckyBalls) {
-			if ((index = seqSearchXY3(luckyBalls, b2)) < 0) {
-				lb = createListX(lb, 3, NULL, 1, 0, 0, 0);
-				appendItems(lb, b2);
-				appendList(luckyBalls, lb);
-			} else {
-				incValXY(luckyBalls, index);
-			}
-		}
-		found=1;
-	}
-
-	b2[0] = b1[1];
-	b2[1] = b1[2];
-	b2[2] = b1[5];
-	b2[3] = '\0';
-
-	if (seqSearchX3(aPrvDrawn, b2) >= 0)
-	{
-		if (buf) {
-			if (found) strcat(buf, ", ");
-			sprintf(fStr, "(%2d,%2d,%2d)", b1[1], b1[2], b1[5]);
 			strcat(buf, fStr);
 		}
 		if (luckyBalls) {
@@ -3307,136 +2550,16 @@ UINT8 search3CombX(struct ListX *aPrvDrawn, struct ListX *drawnBalls, struct Lis
 		found=1;
 	}
 
-	b2[0] = b1[1];
-	b2[1] = b1[3];
-	b2[2] = b1[5];
-	b2[3] = '\0';
-
-	if (seqSearchX3(aPrvDrawn, b2) >= 0)
-	{
-		if (buf) {
-			if (found) strcat(buf, ", ");
-			sprintf(fStr, "(%2d,%2d,%2d)", b1[1], b1[3], b1[5]);
-			strcat(buf, fStr);
-		}
-		if (luckyBalls) {
-			if ((index = seqSearchXY3(luckyBalls, b2)) < 0) {
-				lb = createListX(lb, 3, NULL, 1, 0, 0, 0);
-				appendItems(lb, b2);
-				appendList(luckyBalls, lb);
-			} else {
-				incValXY(luckyBalls, index);
-			}
-		}
-		found=1;
-	}
-
-	b2[0] = b1[1];
-	b2[1] = b1[4];
-	b2[2] = b1[5];
-	b2[3] = '\0';
-
-	if (seqSearchX3(aPrvDrawn, b2) >= 0)
-	{
-		if (buf) {
-			if (found) strcat(buf, ", ");
-			sprintf(fStr, "(%2d,%2d,%2d)", b1[1], b1[4], b1[5]);
-			strcat(buf, fStr);
-		}
-		if (luckyBalls) {
-			if ((index = seqSearchXY3(luckyBalls, b2)) < 0) {
-				lb = createListX(lb, 3, NULL, 1, 0, 0, 0);
-				appendItems(lb, b2);
-				appendList(luckyBalls, lb);
-			} else {
-				incValXY(luckyBalls, index);
-			}
-		}
-		found=1;
-	}
-
 	b2[0] = b1[2];
 	b2[1] = b1[3];
 	b2[2] = b1[4];
 	b2[3] = '\0';
-
+		
 	if (seqSearchX3(aPrvDrawn, b2) >= 0)
 	{
 		if (buf) {
 			if (found) strcat(buf, ", ");
 			sprintf(fStr, "(%2d,%2d,%2d)", b1[2], b1[3], b1[4]);
-			strcat(buf, fStr);
-		}
-		if (luckyBalls) {
-			if ((index = seqSearchXY3(luckyBalls, b2)) < 0) {
-				lb = createListX(lb, 3, NULL, 1, 0, 0, 0);
-				appendItems(lb, b2);
-				appendList(luckyBalls, lb);
-			} else {
-				incValXY(luckyBalls, index);
-			}
-		}
-		found=1;
-	}
-
-	b2[0] = b1[2];
-	b2[1] = b1[3];
-	b2[2] = b1[5];
-	b2[3] = '\0';
-
-	if (seqSearchX3(aPrvDrawn, b2) >= 0)
-	{
-		if (buf) {
-			if (found) strcat(buf, ", ");
-			sprintf(fStr, "(%2d,%2d,%2d)", b1[2], b1[3], b1[5]);
-			strcat(buf, fStr);
-		}
-		if (luckyBalls) {
-			if ((index = seqSearchXY3(luckyBalls, b2)) < 0) {
-				lb = createListX(lb, 3, NULL, 1, 0, 0, 0);
-				appendItems(lb, b2);
-				appendList(luckyBalls, lb);
-			} else {
-				incValXY(luckyBalls, index);
-			}
-		}
-		found=1;
-	}
-
-	b2[0] = b1[2];
-	b2[1] = b1[4];
-	b2[2] = b1[5];
-	b2[3] = '\0';
-
-	if (seqSearchX3(aPrvDrawn, b2) >= 0)
-	{
-		if (buf) {
-			if (found) strcat(buf, ", ");
-			sprintf(fStr, "(%2d,%2d,%2d)", b1[2], b1[4], b1[5]);
-			strcat(buf, fStr);
-		}
-		if (luckyBalls) {
-			if ((index = seqSearchXY3(luckyBalls, b2)) < 0) {
-				lb = createListX(lb, 3, NULL, 1, 0, 0, 0);
-				appendItems(lb, b2);
-				appendList(luckyBalls, lb);
-			} else {
-				incValXY(luckyBalls, index);
-			}
-		}
-		found=1;
-	}
-
-	b2[0] = b1[3];
-	b2[1] = b1[4];
-	b2[2] = b1[5];
-	b2[3] = '\0';
-
-	if (seqSearchX3(aPrvDrawn, b2) >= 0)
-	{
-		if (buf) {
-			if (found) strcat(buf, ", ");
-			sprintf(fStr, "(%2d,%2d,%2d)", b1[3], b1[4], b1[5]);
 			strcat(buf, fStr);
 		}
 		if (luckyBalls) {
@@ -3497,12 +2620,6 @@ UINT8 search2CombXY(struct ListXY *prvDrawnsList, struct ListX *drawnBalls)
 
 		if (seqSearchX2(aPrvDrawn, b2) >= 0) {found=1; break;}
 
-		b2[0] = b1[0];
-		b2[1] = b1[5];
-		b2[2] = '\0';
-
-		if (seqSearchX2(aPrvDrawn, b2) >= 0) {found=1; break;}
-
 		b2[0] = b1[1];
 		b2[1] = b1[2];
 		b2[2] = '\0';
@@ -3521,12 +2638,6 @@ UINT8 search2CombXY(struct ListXY *prvDrawnsList, struct ListX *drawnBalls)
 
 		if (seqSearchX2(aPrvDrawn, b2) >= 0) {found=1; break;}
 
-		b2[0] = b1[1];
-		b2[1] = b1[5];
-		b2[2] = '\0';
-
-		if (seqSearchX2(aPrvDrawn, b2) >= 0) {found=1; break;}
-
 		b2[0] = b1[2];
 		b2[1] = b1[3];
 		b2[2] = '\0';
@@ -3539,26 +2650,8 @@ UINT8 search2CombXY(struct ListXY *prvDrawnsList, struct ListX *drawnBalls)
 
 		if (seqSearchX2(aPrvDrawn, b2) >= 0) {found=1; break;}
 
-		b2[0] = b1[2];
-		b2[1] = b1[5];
-		b2[2] = '\0';
-
-		if (seqSearchX2(aPrvDrawn, b2) >= 0) {found=1; break;}
-
 		b2[0] = b1[3];
 		b2[1] = b1[4];
-		b2[2] = '\0';
-
-		if (seqSearchX2(aPrvDrawn, b2) >= 0) {found=1; break;}
-
-		b2[0] = b1[3];
-		b2[1] = b1[5];
-		b2[2] = '\0';
-
-		if (seqSearchX2(aPrvDrawn, b2) >= 0) {found=1; break;}
-
-		b2[0] = b1[4];
-		b2[1] = b1[5];
 		b2[2] = '\0';
 
 		if (seqSearchX2(aPrvDrawn, b2) >= 0) {found=1; break;}
@@ -3585,11 +2678,10 @@ UINT8 search2CombX(struct ListX *aPrvDrawn, struct ListX *drawnBalls, struct Lis
 	b2[0] = b1[0];
 	b2[1] = b1[1];
 	b2[2] = '\0';
-
+		
 	if (seqSearchX2(aPrvDrawn, b2) >= 0)
 	{
 		if (buf) {
-			if (found) strcat(buf, ", ");
 			sprintf(fStr, "(%2d,%2d)", b1[0], b1[1]);
 			strcat(buf, fStr);
 		}
@@ -3608,7 +2700,7 @@ UINT8 search2CombX(struct ListX *aPrvDrawn, struct ListX *drawnBalls, struct Lis
 	b2[0] = b1[0];
 	b2[1] = b1[2];
 	b2[2] = '\0';
-
+		
 	if (seqSearchX2(aPrvDrawn, b2) >= 0)
 	{
 		if (buf) {
@@ -3631,7 +2723,7 @@ UINT8 search2CombX(struct ListX *aPrvDrawn, struct ListX *drawnBalls, struct Lis
 	b2[0] = b1[0];
 	b2[1] = b1[3];
 	b2[2] = '\0';
-
+		
 	if (seqSearchX2(aPrvDrawn, b2) >= 0)
 	{
 		if (buf) {
@@ -3674,33 +2766,10 @@ UINT8 search2CombX(struct ListX *aPrvDrawn, struct ListX *drawnBalls, struct Lis
 		found=1;
 	}
 
-	b2[0] = b1[0];
-	b2[1] = b1[5];
-	b2[2] = '\0';
-
-	if (seqSearchX2(aPrvDrawn, b2) >= 0)
-	{
-		if (buf) {
-			if (found) strcat(buf, ", ");
-			sprintf(fStr, "(%2d,%2d)", b1[0], b1[5]);
-			strcat(buf, fStr);
-		}
-		if (luckyBalls) {
-			if ((index = seqSearchXY2(luckyBalls, b2)) < 0) {
-				lb = createListX(lb, 2, NULL, 1, 0, 0, 0);
-				appendItems(lb, b2);
-				appendList(luckyBalls, lb);
-			} else {
-				incValXY(luckyBalls, index);
-			}
-		}
-		found=1;
-	}
-
 	b2[0] = b1[1];
 	b2[1] = b1[2];
 	b2[2] = '\0';
-
+		
 	if (seqSearchX2(aPrvDrawn, b2) >= 0)
 	{
 		if (buf) {
@@ -3723,7 +2792,7 @@ UINT8 search2CombX(struct ListX *aPrvDrawn, struct ListX *drawnBalls, struct Lis
 	b2[0] = b1[1];
 	b2[1] = b1[3];
 	b2[2] = '\0';
-
+		
 	if (seqSearchX2(aPrvDrawn, b2) >= 0)
 	{
 		if (buf) {
@@ -3746,35 +2815,12 @@ UINT8 search2CombX(struct ListX *aPrvDrawn, struct ListX *drawnBalls, struct Lis
 	b2[0] = b1[1];
 	b2[1] = b1[4];
 	b2[2] = '\0';
-
+		
 	if (seqSearchX2(aPrvDrawn, b2) >= 0)
 	{
 		if (buf) {
 			if (found) strcat(buf, ", ");
 			sprintf(fStr, "(%2d,%2d)", b1[1], b1[4]);
-			strcat(buf, fStr);
-		}
-		if (luckyBalls) {
-			if ((index = seqSearchXY2(luckyBalls, b2)) < 0) {
-				lb = createListX(lb, 2, NULL, 1, 0, 0, 0);
-				appendItems(lb, b2);
-				appendList(luckyBalls, lb);
-			} else {
-				incValXY(luckyBalls, index);
-			}
-		}
-		found=1;
-	}
-
-	b2[0] = b1[1];
-	b2[1] = b1[5];
-	b2[2] = '\0';
-
-	if (seqSearchX2(aPrvDrawn, b2) >= 0)
-	{
-		if (buf) {
-			if (found) strcat(buf, ", ");
-			sprintf(fStr, "(%2d,%2d)", b1[1], b1[5]);
 			strcat(buf, fStr);
 		}
 		if (luckyBalls) {
@@ -3815,7 +2861,7 @@ UINT8 search2CombX(struct ListX *aPrvDrawn, struct ListX *drawnBalls, struct Lis
 	b2[0] = b1[2];
 	b2[1] = b1[4];
 	b2[2] = '\0';
-
+		
 	if (seqSearchX2(aPrvDrawn, b2) >= 0)
 	{
 		if (buf) {
@@ -3835,84 +2881,15 @@ UINT8 search2CombX(struct ListX *aPrvDrawn, struct ListX *drawnBalls, struct Lis
 		found=1;
 	}
 
-	b2[0] = b1[2];
-	b2[1] = b1[5];
-	b2[2] = '\0';
-
-	if (seqSearchX2(aPrvDrawn, b2) >= 0)
-	{
-		if (buf) {
-			if (found) strcat(buf, ", ");
-			sprintf(fStr, "(%2d,%2d)", b1[2], b1[5]);
-			strcat(buf, fStr);
-		}
-		if (luckyBalls) {
-			if ((index = seqSearchXY2(luckyBalls, b2)) < 0) {
-				lb = createListX(lb, 2, NULL, 1, 0, 0, 0);
-				appendItems(lb, b2);
-				appendList(luckyBalls, lb);
-			} else {
-				incValXY(luckyBalls, index);
-			}
-		}
-		found=1;
-	}
-
 	b2[0] = b1[3];
 	b2[1] = b1[4];
 	b2[2] = '\0';
-
+		
 	if (seqSearchX2(aPrvDrawn, b2) >= 0)
 	{
 		if (buf) {
 			if (found) strcat(buf, ", ");
 			sprintf(fStr, "(%2d,%2d)", b1[3], b1[4]);
-			strcat(buf, fStr);
-		}
-		if (luckyBalls) {
-			if ((index = seqSearchXY2(luckyBalls, b2)) < 0) {
-				lb = createListX(lb, 2, NULL, 1, 0, 0, 0);
-				appendItems(lb, b2);
-				appendList(luckyBalls, lb);
-			} else {
-				incValXY(luckyBalls, index);
-			}
-		}
-		found=1;
-	}
-
-	b2[0] = b1[3];
-	b2[1] = b1[5];
-	b2[2] = '\0';
-
-	if (seqSearchX2(aPrvDrawn, b2) >= 0)
-	{
-		if (buf) {
-			if (found) strcat(buf, ", ");
-			sprintf(fStr, "(%2d,%2d)", b1[3], b1[5]);
-			strcat(buf, fStr);
-		}
-		if (luckyBalls) {
-			if ((index = seqSearchXY2(luckyBalls, b2)) < 0) {
-				lb = createListX(lb, 2, NULL, 1, 0, 0, 0);
-				appendItems(lb, b2);
-				appendList(luckyBalls, lb);
-			} else {
-				incValXY(luckyBalls, index);
-			}
-		}
-		found=1;
-	}
-
-	b2[0] = b1[4];
-	b2[1] = b1[5];
-	b2[2] = '\0';
-
-	if (seqSearchX2(aPrvDrawn, b2) >= 0)
-	{
-		if (buf) {
-			if (found) strcat(buf, ", ");
-			sprintf(fStr, "(%2d,%2d)", b1[4], b1[5]);
 			strcat(buf, fStr);
 		}
 		if (luckyBalls) {
@@ -3991,11 +2968,19 @@ UINT8 init()
 	puts("Initializing... Please wait.");
 
 	winningDrawnBallsList = createListXY(winningDrawnBallsList);
+	plusNumberDrawnBallsList = createListXY(plusNumberDrawnBallsList);
 
-	if (!(fileStatRows = getDrawnBallsList(fileStats))) {
+	if (!(fileStatRows = getDrawnBallsList(winningDrawnBallsList, fileStats))) {
 		printf("%s file or record not found!\n", fileStats);
 		return 0;
 	}
+
+	#ifndef __MSDOS__
+	if (!(fileStatRows = getDrawnBallsList(plusNumberDrawnBallsList, fileStats))) {
+		printf("%s file or record not found!\n", fileStats);
+		return 0;
+	}
+	#endif
 
 	tmp = getListXByIndex(winningDrawnBallsList, fileStatRows-1);
 	formatDate(dateStart, tmp->day, tmp->mon, tmp->year);
@@ -4010,7 +2995,7 @@ UINT8 init()
 	removeAllXY(winningDrawnBallsList);
 	if (!saveLuckyBallsToFile(luckyBalls2, 2)) return 0;
 	removeAllXY(luckyBalls2);
-	if (!(fileStatRows = getDrawnBallsList(fileStats))) {
+	if (!(fileStatRows = getDrawnBallsList(winningDrawnBallsList, fileStats))) {
 		printf("%s file or record not found!\n", fileStats);
 		return 0;
 	}
@@ -4024,7 +3009,7 @@ UINT8 init()
 	removeAllXY(winningDrawnBallsList);
 	if (!saveLuckyBallsToFile(luckyBalls3, 3)) return 0;
 	removeAllXY(luckyBalls3);
-	if (!(fileStatRows = getDrawnBallsList(fileStats))) {
+	if (!(fileStatRows = getDrawnBallsList(winningDrawnBallsList, fileStats))) {
 		printf("%s file or record not found!\n", fileStats);
 		return 0;
 	}
@@ -4038,14 +3023,21 @@ UINT8 init()
 	removeAllXY(winningDrawnBallsList);
 	if (!saveLuckyBallsToFile(luckyBalls4, 4)) return 0;
 	removeAllXY(luckyBalls4);
-	if (!(fileStatRows = getDrawnBallsList(fileStats))) {
+	if (!(fileStatRows = getDrawnBallsList(winningDrawnBallsList, fileStats))) {
+		printf("%s file or record not found!\n", fileStats);
+		return 0;
+	}
+	if (!(fileStatRows = getDrawnBallsList(plusNumberDrawnBallsList, fileStats))) {
 		printf("%s file or record not found!\n", fileStats);
 		return 0;
 	}
 	#endif
 
 	winningBallStats = createListX2(winningBallStats);
+	plusNumberBallStats = createListX2(plusNumberBallStats);
 	getDrawnBallsStats();
+
+	removeAllXY(plusNumberDrawnBallsList);
 
 	calcMatchCombCount();
 	clearScreen();
@@ -4308,8 +3300,7 @@ void calcMatchCombCount()
 			match2comb += search2CombX(aPrvDrawn2, aPrvDrawn1, NULL, NULL);
 			match3comb += search3CombX(aPrvDrawn2, aPrvDrawn1, NULL, NULL);
 			match4comb += search4CombX(aPrvDrawn2, aPrvDrawn1, NULL, NULL);
-			match5comb += search5CombX(aPrvDrawn2, aPrvDrawn1, NULL);
-			match6comb += search6CombX(aPrvDrawn2, aPrvDrawn1);
+			match5comb += search5CombX(aPrvDrawn2, aPrvDrawn1);
 		}
 	}
 }
@@ -4334,7 +3325,7 @@ void calcCombMatch(UINT8 comb, FILE *fp)
 
 	strcpy(pLabel, "Progress");
 
-	if (comb == 2 || comb == 3 || comb == 4 || comb == 5 || comb == 6) 
+	if (comb == 2 || comb == 3 || comb == 4 || comb == 5) 
 	{
 		puts("Matched combinations of numbers from previous draws:\n");
 		if (fp != NULL) fprintf(fp, "Matched combinations of numbers from previous draws:\n\n");
@@ -4359,11 +3350,6 @@ void calcCombMatch(UINT8 comb, FILE *fp)
 			if (fp != NULL) fprintf(fp, "Matched 5 combinations: %lu\n\n", match5comb);
     		matchComb = match5comb;
 		}
-		else if (comb == 6) {
-			printf("Matched 6 combinations: %lu\n\n", match6comb);
-			if (fp != NULL) fprintf(fp, "Matched 5 combinations: %lu\n\n", match6comb);
-    		matchComb = match6comb;
-		}
 
 		for (i=0, k=0, x=0; x<matchComb && i<fileStatRows; i++) 
 		{
@@ -4387,12 +3373,9 @@ void calcCombMatch(UINT8 comb, FILE *fp)
 					found = search4CombX(aPrvDrawn2, aPrvDrawn1, NULL, lbBuf);
 				}
 				else if (comb == 5) {
-					found = search5CombX(aPrvDrawn2, aPrvDrawn1, NULL);
+					found = search5CombX(aPrvDrawn2, aPrvDrawn1);
 				}
-				else if (comb == 6) {
-					found = search6CombX(aPrvDrawn2, aPrvDrawn1);
-				}
-
+				
 				if (found) 
 				{
 					x++;
@@ -4425,27 +3408,27 @@ void calcCombMatch(UINT8 comb, FILE *fp)
 						formatDate(date1, d1, m1, y1);
 					}
 					else {
-						if (comb >= 5) printf("                                  ");
-						if (fp != NULL) fprintf(fp, "                                  ");
+						if (comb >= 5) printf("                               ");
+						if (fp != NULL) fprintf(fp, "                               ");
 					}
 					
 					formatDate(date2, aPrvDrawn2->day, aPrvDrawn2->mon, aPrvDrawn2->year);
 
 					if (comb >= 5) printf("    %s : ", date2);
 					if (fp != NULL) fprintf(fp, "    %s : ", date2);
-
+			
 					if (comb >= 5) printListXByKey(aPrvDrawn2, 0, fp);
 					else  printListXByKey(aPrvDrawn2, 2, fp);
-
+		
 					y2 = aPrvDrawn2->year;
 					m2 = aPrvDrawn2->mon;
 					d2 = aPrvDrawn2->day;
-
+		
 					dDif = dateDiff(d2, m2, y2, d1, m1, y1);
 
-					if (comb >= 5) printf("  %4d days", dDif);
-					if (fp != NULL) fprintf(fp, "  %4d days", dDif);
-
+					if (comb >= 5) printf("   %4d days", dDif);
+					if (fp != NULL) fprintf(fp, "   %4d days", dDif);
+		
 					if (comb != 5) {
 						if (comb >= 5) printf("   %s", lbBuf);
 						if (fp != NULL) fprintf(fp, "   %s", lbBuf);
@@ -4629,8 +3612,14 @@ void drawBalls(struct ListXY *coupon, UINT8 totalBall, UINT8 drawBallCount, UINT
 
 	UINT8 numOfAttempts = (UINT8) ceil(5*totalBall/drawBallCount);
 
-	ballStats = winningBallStats;
-	strcpy(pLabel, "Numbers");
+	if (drawBallCount == 1) {
+		ballStats = plusNumberBallStats;
+		strcpy(pLabel, "PlusNumber");
+	}
+	else {
+		ballStats = winningBallStats;
+		strcpy(pLabel, "Numbers");
+	}
 
 	for (j=0; drawCountDown; j++)
 	{
@@ -4947,14 +3936,41 @@ void drawBalls(struct ListXY *coupon, UINT8 totalBall, UINT8 drawBallCount, UINT
 		/* Lucky */
 		if (drawByLucky && drawCountDown)
 		{
-			luckyNum = (j%3)+1;
+			if (drawBallCount > 1) // winning numbers
+			{
+				luckyNum = (j%3)+1;
 
-			if (luckyNum == 1) strcpy(label, "(lucky 3)");
-			else if (luckyNum == 2) strcpy(label, "(2 of lucky 3)");
-			else strcpy(label, "(lucky 2)");
+				if (luckyNum == 1) strcpy(label, "(lucky 3)");
+				else if (luckyNum == 2) strcpy(label, "(2 of lucky 3)");
+				else strcpy(label, "(lucky 2)");
 
-			drawnBalls = createListX(drawnBalls, drawBallCount, label, 0, 0, 0, 0);
-   	        drawnBalls = drawBallsByLucky(drawnBalls, luckyNum, totalBall, drawBallCount);
+				drawnBalls = createListX(drawnBalls, drawBallCount, label, 0, 0, 0, 0);
+    	        drawnBalls = drawBallsByLucky(drawnBalls, luckyNum, totalBall, drawBallCount);
+			}
+			else // plusNumber
+			{
+				strcpy(label, "plus number");
+				drawnBalls = createListX(drawnBalls, drawBallCount, label, 0, 0, 0, 0);
+
+				for (i=0; i < numOfAttempts; i++) 
+				{
+					if (i < ceil(numOfAttempts/4)) {
+    					if (j%2 == 0) drawnBalls = drawBallByNorm(drawnBalls, ballStats, totalBall, drawBallCount, 0, 0);
+						else drawnBalls = drawBallByLeft(drawnBalls, ballStats, totalBall, drawBallCount, 0, 0);
+					} else if (i < ceil(numOfAttempts/2)) {
+    					if (j%2 == 0) drawnBalls = drawBallByBlend1(drawnBalls, ballStats, totalBall, drawBallCount, 0, 0);
+						else drawnBalls = drawBallByBlend2(drawnBalls, ballStats, totalBall, drawBallCount, 0, 0);
+					} else if (i < ceil(3*numOfAttempts/4)) {
+    					drawnBalls = drawBallBySide(drawnBalls, ballStats, totalBall, drawBallCount, 0, 0);
+					} else {
+    					drawnBalls = drawBallByRand(drawnBalls, ballStats, totalBall, drawBallCount, 0, 0);
+					}
+
+					if (lengthY(coupon) > ceil(1.25*totalBall/drawBallCount)) break;
+    				found = search1BallXY(coupon, drawnBalls, drawBallCount);
+					if(!found) break;
+				}
+			}
 
 			appendList(coupon, drawnBalls);
 			drawCountDown--;
@@ -4966,12 +3982,13 @@ void drawBalls(struct ListXY *coupon, UINT8 totalBall, UINT8 drawBallCount, UINT
 
 
 
-UINT16 getDrawnBallsList(char *fileName)
+UINT16 getDrawnBallsList(struct ListXY *ballList, char *fileName)
 {
 	UINT16 i=0;
-	int d1, m1, y1;
-	int n1, n2, n3, n4, n5, n6;
+	int d1, m1, y1, pn;
+	int n1, n2, n3, n4, n5;
 	UINT8 keys[DRAW_BALL+1];
+	UINT8 size;
 	char ioBuf[50];
 
 	FILE *fp;
@@ -4984,20 +4001,25 @@ UINT16 getDrawnBallsList(char *fileName)
 
 	for (i=0; fgets(ioBuf, 50, fp) && i<UINT16MAX; i++)
 	{
-		sscanf(ioBuf, "%d.%d.%d\t%d\t%d\t%d\t%d\t%d\t%d\n", &d1, &m1, &y1, &n1, &n2, &n3, &n4, &n5, &n6);
+		sscanf(ioBuf, "%d.%d.%d\t%d\t%d\t%d\t%d\t%d\t%d\n", &d1, &m1, &y1, &n1, &n2, &n3, &n4, &n5, &pn);
 
-		keys[0] = (UINT8) n1;
-		keys[1] = (UINT8) n2;
-		keys[2] = (UINT8) n3;
-		keys[3] = (UINT8) n4;
-		keys[4] = (UINT8) n5;
-		keys[5] = (UINT8) n6;
-		keys[6] = '\0';
-
-		drawList = createListX(drawList, DRAW_BALL, NULL, 0, (UINT16) y1, (UINT8) m1, (UINT8) d1);
+		if (ballList == winningDrawnBallsList) {
+			keys[0] = (UINT8) n1;
+			keys[1] = (UINT8) n2;
+			keys[2] = (UINT8) n3;
+			keys[3] = (UINT8) n4;
+			keys[4] = (UINT8) n5;
+			keys[5] = '\0';
+			size = DRAW_BALL;
+		} else if (ballList == plusNumberDrawnBallsList) {
+			keys[0] = (UINT8) pn;
+			keys[1] = '\0';
+			size = 1;
+		}
+		drawList = createListX(drawList, size, NULL, 0, (UINT16) y1, (UINT8) m1, (UINT8) d1);
 
 		appendItems(drawList, keys);
-		appendList(winningDrawnBallsList, drawList);
+		appendList(ballList, drawList);
 	}
 
 	fclose(fp);
@@ -5447,7 +4469,7 @@ void getDrawnBallsStats()
 {
 	UINT8 i;
 	UINT16 j;
-	UINT8 n1, n2, n3, n4, n5, n6;
+	UINT8 n1, n2, n3, n4, n5, pn;
 	UINT8 keys[DRAW_BALL+1];
 	int index;
 
@@ -5468,14 +4490,25 @@ void getDrawnBallsStats()
 		n3 = keys[2];
 		n4 = keys[3];
 		n5 = keys[4];
-		n6 = keys[5];
 
 		if ((index = seqSearch2X1(winningBallStats,n1)) != -1) incVal2(winningBallStats, index);
 		if ((index = seqSearch2X1(winningBallStats,n2)) != -1) incVal2(winningBallStats, index);
 		if ((index = seqSearch2X1(winningBallStats,n3)) != -1) incVal2(winningBallStats, index);
 		if ((index = seqSearch2X1(winningBallStats,n4)) != -1) incVal2(winningBallStats, index);
 		if ((index = seqSearch2X1(winningBallStats,n5)) != -1) incVal2(winningBallStats, index);
-		if ((index = seqSearch2X1(winningBallStats,n6)) != -1) incVal2(winningBallStats, index);
+	}
+
+	for (i=0; i<TOTAL_BALL_PN; i++) {
+		appendItem2(plusNumberBallStats, i+1, 0);
+	}
+
+	for (j=0; j<fileStatRows; j++) 
+	{
+		aPrvDrawn = getListXByIndex(plusNumberDrawnBallsList, j);
+
+		pn = getKey(aPrvDrawn, 0);
+
+		if ((index = seqSearch2X1(plusNumberBallStats,pn)) != -1) incVal2(plusNumberBallStats, index);
 	}
 }
 
@@ -5626,6 +4659,7 @@ int main(void)
 {
 	UINT16 keyb = 0, keyb2;
 	struct ListXY *coupon = NULL;
+	struct ListXY *coupon_pn = NULL;
 	FILE *fp;
 
 	srand((unsigned) time(NULL));
@@ -5636,22 +4670,25 @@ int main(void)
 	}
 
 	coupon = createListXY(coupon);
+	coupon_pn = createListXY(coupon_pn);
 
 mainMenu:
 
 	bubbleSortX2ByVal(winningBallStats, -1);
+	bubbleSortX2ByVal(plusNumberBallStats, -1);
 
-	puts("Super Lotto 1.0 Copyright ibrahim Tipirdamaz (c) 2022\n");
+	puts("SansTopu Lotto 1.0 Copyright ibrahim Tipirdamaz (c) 2022\n");
 	printf("Includes draws between dates %s - %s\n", dateStart, dateEnd);
 	printf("If the %s file is out of date, update it.\n\n", FILESTATS);
 	puts("Which number drawn how many times?\n");
 
 	printBallStats(winningBallStats);
-	printf("\n");
+	printf("\n\n");
 
-	#ifndef __MSDOS__
-	printf("\n");
-	#endif
+	puts("Number of draws of PlusNumbers\n");
+
+	printBallStats(plusNumberBallStats);
+	printf("\n\n");
 
 	printf("1- Draw Ball\n");
 	printf("2- Matched 2 combinations: %lu\n", match2comb);
@@ -5717,7 +4754,11 @@ keybCommand:
 
 		/* coupon, totalBall, drawBallCount, drawRowCount, drawByNorm, left, blend1, blend2, side, rand, lucky */
 		drawBalls(coupon, TOTAL_BALL, DRAW_BALL, keyb2, 1, 1, 1, 1, 1, 1, 1);
-		printListXYByKey(coupon, fp);
+
+		/* draw plus numbers */
+		drawBalls(coupon_pn, TOTAL_BALL_PN, 1, keyb2, 1, 1, 1, 1, 1, 1, 1);
+		printListXYWithPNByKey(coupon, coupon_pn, fp);
+		removeAllXY(coupon_pn);
 		removeAllXY(coupon);
 
 	} else if (keyb == 2) {
@@ -5779,6 +4820,7 @@ exitProgram:
 
 	removeAllXY(winningDrawnBallsList);
 	removeAllX2(winningBallStats);
+	removeAllX2(plusNumberBallStats);
 
 	return 0;
 }

@@ -1,5 +1,5 @@
 /**
- * Super Lotto Statistics and Ball Draw Algorithms
+ * Sayisal Lotto Statistics and Ball Draw Algorithms
  * Author: İbrahim Tıpırdamaz  <itipirdamaz@gmail.com>
  * Copyright 2022
 */
@@ -53,11 +53,12 @@
 #endif
 
 
-#define TOTAL_BALL 60			    // total ball count
+#define TOTAL_BALL 90			    // total ball count
 #define DRAW_BALL 6		            // number of balls to be drawn
+#define TOTAL_BALL_SS 90		    // total super star count
 
 
-#define FILESTATS "super.txt"       // statistics file (winning numbers)
+#define FILESTATS "sayisal.txt"     // statistics file (winning numbers, super stars)
 #define OUTPUTFILE "output.txt"     // file to write results
 
 
@@ -134,7 +135,9 @@ struct ListXY {			/* 2 dimensions List. Multi draw (coupon or drawn balls from f
 /* Drawn balls lists from file has been drawn so far */
 
 struct ListXY *winningDrawnBallsList = NULL;
-UINT16 fileStatRows = 0;
+struct ListXY *superStarDrawnBallsList = NULL;
+UINT16 winningBallRows = 0;
+UINT16 sStarBallRows = 0;
 
 
 /* Old drawn dates between dateStart and dateEnd */
@@ -145,6 +148,7 @@ char dateStart[11], dateEnd[11];
 /* How many times were the winning numbers drawn in the previous draws? */
 
 struct ListX2 *winningBallStats = NULL;
+struct ListX2 *superStarBallStats = NULL;
 
 
 /* Numbers that drawn together (how many times the numbers drawn together) */
@@ -689,19 +693,20 @@ void printListXByKey(struct ListX *pl, UINT8 printTo, FILE *fp);
 
 
 /** 
- * print ListXY By Key
+ * print ListXY With SuperStar ByKey
  * Print keys of the items (row by row) in the 2 dimensions lists
  * 
  * @param {struct ListXY *}    : refers to 2 dimensions ball list (winning numbers)
+ * @param {struct ListXY *}    : refers to 2 dimensions ball list (superStar)
  * @param {FILE *} fp          : refers to output file. If fp != NULL print to output file
  */
-void printListXYByKey(struct ListXY *pl, FILE *fp);
+void printListXYWithSSByKey(struct ListXY *pl1, struct ListXY *pl2, FILE *fp);
 
 
 
 /** 
  * How many times the balls has been drawn so far 
- * (assign value to winningBallStats global variable)
+ * (assign values to winningBallStats and superStarBallStats global variables)
  * 
  */
 void getDrawnBallsStats();
@@ -1107,12 +1112,13 @@ void drawBalls(struct ListXY *coupon, UINT8 totalBall, UINT8 drawBallCount, UINT
 
 /** 
  * Get drawn balls lists from file has been drawn so far
- * The lists is assigned to the global variable winningDrawnBallsList
+ * The lists is assigned to the global variables winningDrawnBallsList or superStarDrawnBallsList
  * 
- * @param {char *}           : Drawn list file
+ * @param {struct ListXY *}      : refer to 2 dimensions list of winning numbers (winningDrawnBallsList or superStarDrawnBallsList)
+ * @param {char *}               : Drawn list file
  * @return {Integer}		 : returns 0 if fileName or record not found, otherwise returns the number of records.
  */
-UINT16 getDrawnBallsList(char *fileName);
+UINT16 getDrawnBallsList(struct ListXY *ballList, char *fileName);
 
 
 
@@ -1865,34 +1871,43 @@ void printListXByKey(struct ListX *pl, UINT8 printTo, FILE *fp)
 
 
 
-void printListXYByKey(struct ListXY *pl, FILE *fp)
+void printListXYWithSSByKey(struct ListXY *pl1, struct ListXY *pl2, FILE *fp)
 {
-	struct ListX *nl = pl->list;
+	struct ListX *nl1 = pl1->list;
+	struct ListX *nl2 = pl2->list;
 	char ioBuf[60];
 	char buf[30];
 	UINT8 i, j;
 
-	puts("     Numbers                   \n");
-	if (fp != NULL) fputs("     Numbers                   \n\n", fp);
+	puts("     Numbers          SuperStar\n");
+	if (fp != NULL) fputs("     Numbers          SuperStar\n\n", fp);
 
-	for (i=1; (nl); i++)
+	for (i=1; (nl1) && (nl2); i++)
 	{
 		ioBuf[0] = '\0';
 
 		sprintf(buf, "%2d - ", i);
 		strcat(ioBuf, buf);
 
-		for (j=0; j < nl->index; j++) {
-			sprintf(buf, "%2d ", nl->balls[j]);
+		for (j=0; j < nl1->index; j++) {
+			sprintf(buf, "%2d ", nl1->balls[j]);
 			strcat(ioBuf, buf);
 		}
 
-		if (nl->label) {
-			sprintf(buf, "   %s", nl->label);
+		strcat(ioBuf, "  ");
+
+		for (j=0; j < nl2->index; j++) {
+			sprintf(buf, "%2d ", nl2->balls[j]);
 			strcat(ioBuf, buf);
 		}
 
-		nl = nl->next;
+		if (nl1->label) {
+			sprintf(buf, "     %s", nl1->label);
+			strcat(ioBuf, buf);
+		}
+
+		nl1 = nl1->next;
+		nl2 = nl2->next;
 
 		strcat(ioBuf, "\n");
 
@@ -2037,7 +2052,7 @@ UINT8 search6CombXY(struct ListXY *prvDrawnsList, struct ListX *drawnBalls)
 	struct ListX *aPrvDrawn = NULL;
 	UINT8 found = 0;
 
-	if (prvDrawnsList == winningDrawnBallsList) listRows = fileStatRows;
+	if (prvDrawnsList == winningDrawnBallsList) listRows = winningBallRows;
 	else listRows = lengthY(prvDrawnsList);
 
 	getKeys(drawnBalls, balls, 0, 0);
@@ -2076,7 +2091,7 @@ UINT8 search5CombXY(struct ListXY *prvDrawnsList, struct ListX *drawnBalls)
 	struct ListX *aPrvDrawn = NULL;
 	UINT8 found = 0;
 
-	if (prvDrawnsList == winningDrawnBallsList) listRows = fileStatRows;
+	if (prvDrawnsList == winningDrawnBallsList) listRows = winningBallRows;
 	else listRows = lengthY(prvDrawnsList);
 
 	getKeys(drawnBalls, b1, 0, drawnBalls->size);
@@ -2267,7 +2282,7 @@ UINT8 search4CombXY(struct ListXY *prvDrawnsList, struct ListX *drawnBalls)
 	struct ListX *aPrvDrawn = NULL;
 	UINT8 found = 0;
 
-	if (prvDrawnsList == winningDrawnBallsList) listRows = fileStatRows;
+	if (prvDrawnsList == winningDrawnBallsList) listRows = winningBallRows;
 	else listRows = lengthY(prvDrawnsList);
 
 	getKeys(drawnBalls, b1, 0, drawnBalls->size);
@@ -2803,7 +2818,7 @@ UINT8 search3CombXY(struct ListXY *prvDrawnsList, struct ListX *drawnBalls)
 	struct ListX *aPrvDrawn = NULL;
 	UINT8 found = 0;
 
-	if (prvDrawnsList == winningDrawnBallsList) listRows = fileStatRows;
+	if (prvDrawnsList == winningDrawnBallsList) listRows = winningBallRows;
 	else listRows = lengthY(prvDrawnsList);
 
 	getKeys(drawnBalls, b1, 0, drawnBalls->size);
@@ -3464,7 +3479,7 @@ UINT8 search2CombXY(struct ListXY *prvDrawnsList, struct ListX *drawnBalls)
 	struct ListX *aPrvDrawn = NULL;
 	UINT8 found = 0;
 
-	if (prvDrawnsList == winningDrawnBallsList) listRows = fileStatRows;
+	if (prvDrawnsList == winningDrawnBallsList) listRows = winningBallRows;
 	else listRows = lengthY(prvDrawnsList);
 
 	getKeys(drawnBalls, b1, 0, drawnBalls->size);
@@ -3991,13 +4006,21 @@ UINT8 init()
 	puts("Initializing... Please wait.");
 
 	winningDrawnBallsList = createListXY(winningDrawnBallsList);
+	superStarDrawnBallsList = createListXY(superStarDrawnBallsList);
 
-	if (!(fileStatRows = getDrawnBallsList(fileStats))) {
+	if (!(winningBallRows = getDrawnBallsList(winningDrawnBallsList, fileStats))) {
 		printf("%s file or record not found!\n", fileStats);
 		return 0;
 	}
 
-	tmp = getListXByIndex(winningDrawnBallsList, fileStatRows-1);
+	#ifndef __MSDOS__
+	if (!(sStarBallRows = getDrawnBallsList(superStarDrawnBallsList, fileStats))) {
+		printf("%s file or record not found!\n", fileStats);
+		return 0;
+	}
+	#endif
+
+	tmp = getListXByIndex(winningDrawnBallsList, winningBallRows-1);
 	formatDate(dateStart, tmp->day, tmp->mon, tmp->year);
 	tmp = winningDrawnBallsList->list;
 	formatDate(dateEnd, tmp->day, tmp->mon, tmp->year);
@@ -4010,7 +4033,7 @@ UINT8 init()
 	removeAllXY(winningDrawnBallsList);
 	if (!saveLuckyBallsToFile(luckyBalls2, 2)) return 0;
 	removeAllXY(luckyBalls2);
-	if (!(fileStatRows = getDrawnBallsList(fileStats))) {
+	if (!(winningBallRows = getDrawnBallsList(winningDrawnBallsList, fileStats))) {
 		printf("%s file or record not found!\n", fileStats);
 		return 0;
 	}
@@ -4024,7 +4047,7 @@ UINT8 init()
 	removeAllXY(winningDrawnBallsList);
 	if (!saveLuckyBallsToFile(luckyBalls3, 3)) return 0;
 	removeAllXY(luckyBalls3);
-	if (!(fileStatRows = getDrawnBallsList(fileStats))) {
+	if (!(winningBallRows = getDrawnBallsList(winningDrawnBallsList, fileStats))) {
 		printf("%s file or record not found!\n", fileStats);
 		return 0;
 	}
@@ -4038,14 +4061,21 @@ UINT8 init()
 	removeAllXY(winningDrawnBallsList);
 	if (!saveLuckyBallsToFile(luckyBalls4, 4)) return 0;
 	removeAllXY(luckyBalls4);
-	if (!(fileStatRows = getDrawnBallsList(fileStats))) {
+	if (!(winningBallRows = getDrawnBallsList(winningDrawnBallsList, fileStats))) {
+		printf("%s file or record not found!\n", fileStats);
+		return 0;
+	}
+	if (!(sStarBallRows = getDrawnBallsList(superStarDrawnBallsList, fileStats))) {
 		printf("%s file or record not found!\n", fileStats);
 		return 0;
 	}
 	#endif
 
 	winningBallStats = createListX2(winningBallStats);
+	superStarBallStats = createListX2(superStarBallStats);
 	getDrawnBallsStats();
+
+	removeAllXY(superStarDrawnBallsList);
 
 	calcMatchCombCount();
 	clearScreen();
@@ -4071,11 +4101,11 @@ struct ListXY * getLuckyBalls(struct ListXY *luckyBalls, UINT8 comb)
 
 	if (comb == 2 || comb == 3 || comb == 4)
 	{
-		for (i=0; i<fileStatRows; i++)
+		for (i=0; i<winningBallRows; i++)
 		{
 			aPrvDrawn1 = getListXByIndex(winningDrawnBallsList, i);
 
-			for (j=i+1; j<fileStatRows; j++)
+			for (j=i+1; j<winningBallRows; j++)
 			{
 				aPrvDrawn2 = getListXByIndex(winningDrawnBallsList, j);
 
@@ -4297,11 +4327,11 @@ void calcMatchCombCount()
 	struct ListX *aPrvDrawn1 = NULL;
 	struct ListX *aPrvDrawn2 = NULL;
 
-	for (i=0; i<fileStatRows; i++)
+	for (i=0; i<winningBallRows; i++)
 	{
 		aPrvDrawn1 = getListXByIndex(winningDrawnBallsList, i);
 
-		for (j=i+1; j<fileStatRows; j++) 
+		for (j=i+1; j<winningBallRows; j++) 
 		{
 			aPrvDrawn2 = getListXByIndex(winningDrawnBallsList, j);
 
@@ -4365,15 +4395,15 @@ void calcCombMatch(UINT8 comb, FILE *fp)
     		matchComb = match6comb;
 		}
 
-		for (i=0, k=0, x=0; x<matchComb && i<fileStatRows; i++) 
+		for (i=0, k=0, x=0; x<matchComb && i<winningBallRows; i++) 
 		{
 			if (comb == 2 || comb == 3 || comb == 4) {
-					 printPercentOfProgress(pLabel, k, (UINT32) ceil((UINT32) fileStatRows*((UINT32) fileStatRows-1)/2));
+					 printPercentOfProgress(pLabel, k, (UINT32) ceil((UINT32) winningBallRows*((UINT32) winningBallRows-1)/2));
 			}
 
 			aPrvDrawn1 = getListXByIndex(winningDrawnBallsList, i);
 
-			for (j=i+1; j<fileStatRows; j++, k++) 
+			for (j=i+1; j<winningBallRows; j++, k++) 
 			{
 				aPrvDrawn2 = getListXByIndex(winningDrawnBallsList, j);
 
@@ -4433,19 +4463,19 @@ void calcCombMatch(UINT8 comb, FILE *fp)
 
 					if (comb >= 5) printf("    %s : ", date2);
 					if (fp != NULL) fprintf(fp, "    %s : ", date2);
-
+			
 					if (comb >= 5) printListXByKey(aPrvDrawn2, 0, fp);
 					else  printListXByKey(aPrvDrawn2, 2, fp);
-
+		
 					y2 = aPrvDrawn2->year;
 					m2 = aPrvDrawn2->mon;
 					d2 = aPrvDrawn2->day;
-
+		
 					dDif = dateDiff(d2, m2, y2, d1, m1, y1);
 
-					if (comb >= 5) printf("  %4d days", dDif);
-					if (fp != NULL) fprintf(fp, "  %4d days", dDif);
-
+					if (comb >= 5) printf("   %4d days", dDif);
+					if (fp != NULL) fprintf(fp, "   %4d days", dDif);
+		
 					if (comb != 5) {
 						if (comb >= 5) printf("   %s", lbBuf);
 						if (fp != NULL) fprintf(fp, "   %s", lbBuf);
@@ -4629,8 +4659,14 @@ void drawBalls(struct ListXY *coupon, UINT8 totalBall, UINT8 drawBallCount, UINT
 
 	UINT8 numOfAttempts = (UINT8) ceil(5*totalBall/drawBallCount);
 
-	ballStats = winningBallStats;
-	strcpy(pLabel, "Numbers");
+	if (drawBallCount == 1) {
+		ballStats = superStarBallStats;
+		strcpy(pLabel, "SuperStar");
+	}
+	else {
+		ballStats = winningBallStats;
+		strcpy(pLabel, "Numbers");
+	}
 
 	for (j=0; drawCountDown; j++)
 	{
@@ -4947,14 +4983,41 @@ void drawBalls(struct ListXY *coupon, UINT8 totalBall, UINT8 drawBallCount, UINT
 		/* Lucky */
 		if (drawByLucky && drawCountDown)
 		{
-			luckyNum = (j%3)+1;
+			if (drawBallCount > 1) // winning numbers
+			{
+				luckyNum = (j%3)+1;
 
-			if (luckyNum == 1) strcpy(label, "(lucky 3)");
-			else if (luckyNum == 2) strcpy(label, "(2 of lucky 3)");
-			else strcpy(label, "(lucky 2)");
+				if (luckyNum == 1) strcpy(label, "(lucky 3)");
+				else if (luckyNum == 2) strcpy(label, "(2 of lucky 3)");
+				else strcpy(label, "(lucky 2)");
 
-			drawnBalls = createListX(drawnBalls, drawBallCount, label, 0, 0, 0, 0);
-   	        drawnBalls = drawBallsByLucky(drawnBalls, luckyNum, totalBall, drawBallCount);
+				drawnBalls = createListX(drawnBalls, drawBallCount, label, 0, 0, 0, 0);
+    	        drawnBalls = drawBallsByLucky(drawnBalls, luckyNum, totalBall, drawBallCount);
+			}
+			else // superStar
+			{
+				strcpy(label, "super star");
+				drawnBalls = createListX(drawnBalls, drawBallCount, label, 0, 0, 0, 0);
+
+				for (i=0; i < numOfAttempts; i++) 
+				{
+					if (i < ceil(numOfAttempts/4)) {
+    					if (j%2 == 0) drawnBalls = drawBallByNorm(drawnBalls, ballStats, totalBall, drawBallCount, 0, 0);
+						else drawnBalls = drawBallByLeft(drawnBalls, ballStats, totalBall, drawBallCount, 0, 0);
+					} else if (i < ceil(numOfAttempts/2)) {
+    					if (j%2 == 0) drawnBalls = drawBallByBlend1(drawnBalls, ballStats, totalBall, drawBallCount, 0, 0);
+						else drawnBalls = drawBallByBlend2(drawnBalls, ballStats, totalBall, drawBallCount, 0, 0);
+					} else if (i < ceil(3*numOfAttempts/4)) {
+    					drawnBalls = drawBallBySide(drawnBalls, ballStats, totalBall, drawBallCount, 0, 0);
+					} else {
+    					drawnBalls = drawBallByRand(drawnBalls, ballStats, totalBall, drawBallCount, 0, 0);
+					}
+
+					if (lengthY(coupon) > ceil(1.25*totalBall/drawBallCount)) break;
+    				found = search1BallXY(coupon, drawnBalls, drawBallCount);
+					if(!found) break;
+				}
+			}
 
 			appendList(coupon, drawnBalls);
 			drawCountDown--;
@@ -4966,12 +5029,13 @@ void drawBalls(struct ListXY *coupon, UINT8 totalBall, UINT8 drawBallCount, UINT
 
 
 
-UINT16 getDrawnBallsList(char *fileName)
+UINT16 getDrawnBallsList(struct ListXY *ballList, char *fileName)
 {
 	UINT16 i=0;
-	int d1, m1, y1;
+	int d1, m1, y1, jk, ss;
 	int n1, n2, n3, n4, n5, n6;
 	UINT8 keys[DRAW_BALL+1];
+	UINT8 size;
 	char ioBuf[50];
 
 	FILE *fp;
@@ -4982,22 +5046,30 @@ UINT16 getDrawnBallsList(char *fileName)
 		return 0;
 	}
 
-	for (i=0; fgets(ioBuf, 50, fp) && i<UINT16MAX; i++)
+	for (i=0; fgets(ioBuf, 50, fp) && i<UINT16MAX;)
 	{
-		sscanf(ioBuf, "%d.%d.%d\t%d\t%d\t%d\t%d\t%d\t%d\n", &d1, &m1, &y1, &n1, &n2, &n3, &n4, &n5, &n6);
+		sscanf(ioBuf, "%d.%d.%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n", &d1, &m1, &y1, &n1, &n2, &n3, &n4, &n5, &n6, &jk, &ss);
 
-		keys[0] = (UINT8) n1;
-		keys[1] = (UINT8) n2;
-		keys[2] = (UINT8) n3;
-		keys[3] = (UINT8) n4;
-		keys[4] = (UINT8) n5;
-		keys[5] = (UINT8) n6;
-		keys[6] = '\0';
-
-		drawList = createListX(drawList, DRAW_BALL, NULL, 0, (UINT16) y1, (UINT8) m1, (UINT8) d1);
+		if (ballList == winningDrawnBallsList) {
+			keys[0] = (UINT8) n1;
+			keys[1] = (UINT8) n2;
+			keys[2] = (UINT8) n3;
+			keys[3] = (UINT8) n4;
+			keys[4] = (UINT8) n5;
+			keys[5] = (UINT8) n6;
+			keys[6] = '\0';
+			size = DRAW_BALL;
+		} else if (ballList == superStarDrawnBallsList) {
+			if (ss == 0) continue;
+			keys[0] = (UINT8) ss;
+			keys[1] = '\0';
+			size = 1;
+		}
+		drawList = createListX(drawList, size, NULL, 0, (UINT16) y1, (UINT8) m1, (UINT8) d1);
 
 		appendItems(drawList, keys);
-		appendList(winningDrawnBallsList, drawList);
+		appendList(ballList, drawList);
+		i++;
 	}
 
 	fclose(fp);
@@ -5447,7 +5519,7 @@ void getDrawnBallsStats()
 {
 	UINT8 i;
 	UINT16 j;
-	UINT8 n1, n2, n3, n4, n5, n6;
+	UINT8 n1, n2, n3, n4, n5, n6, ss;
 	UINT8 keys[DRAW_BALL+1];
 	int index;
 
@@ -5457,7 +5529,7 @@ void getDrawnBallsStats()
 		appendItem2(winningBallStats, i+1, 0);
 	}
 
-	for (j=0; j<fileStatRows; j++)
+	for (j=0; j<winningBallRows; j++)
 	{
 		aPrvDrawn = getListXByIndex(winningDrawnBallsList, j);
 
@@ -5476,6 +5548,19 @@ void getDrawnBallsStats()
 		if ((index = seqSearch2X1(winningBallStats,n4)) != -1) incVal2(winningBallStats, index);
 		if ((index = seqSearch2X1(winningBallStats,n5)) != -1) incVal2(winningBallStats, index);
 		if ((index = seqSearch2X1(winningBallStats,n6)) != -1) incVal2(winningBallStats, index);
+	}
+
+	for (i=0; i<TOTAL_BALL_SS; i++) {
+		appendItem2(superStarBallStats, i+1, 0);
+	}
+
+	for (j=0; j<sStarBallRows; j++) 
+	{
+		aPrvDrawn = getListXByIndex(superStarDrawnBallsList, j);
+
+		ss = getKey(aPrvDrawn, 0);
+
+		if ((index = seqSearch2X1(superStarBallStats,ss)) != -1) incVal2(superStarBallStats, index);
 	}
 }
 
@@ -5626,6 +5711,7 @@ int main(void)
 {
 	UINT16 keyb = 0, keyb2;
 	struct ListXY *coupon = NULL;
+	struct ListXY *coupon_ss = NULL;
 	FILE *fp;
 
 	srand((unsigned) time(NULL));
@@ -5636,21 +5722,24 @@ int main(void)
 	}
 
 	coupon = createListXY(coupon);
+	coupon_ss = createListXY(coupon_ss);
 
 mainMenu:
 
-	bubbleSortX2ByVal(winningBallStats, -1);
-
-	puts("Super Lotto 1.0 Copyright ibrahim Tipirdamaz (c) 2022\n");
+	puts("Sayisal Lotto 1.0 Copyright ibrahim Tipirdamaz (c) 2022\n");
 	printf("Includes draws between dates %s - %s\n", dateStart, dateEnd);
 	printf("If the %s file is out of date, update it.\n\n", FILESTATS);
 	puts("Which number drawn how many times?\n");
 
+	bubbleSortX2ByVal(winningBallStats, -1);
 	printBallStats(winningBallStats);
 	printf("\n");
 
 	#ifndef __MSDOS__
-	printf("\n");
+	puts("Number of draws of SuperStars\n");
+	bubbleSortX2ByVal(superStarBallStats, -1);
+	printBallStats(superStarBallStats);
+	printf("\n\n");
 	#endif
 
 	printf("1- Draw Ball\n");
@@ -5659,7 +5748,7 @@ mainMenu:
 	printf("4- Matched 4 combinations: %lu\n", match4comb);
 	printf("5- Matched 5 combinations: %lu", match5comb);
 	#ifdef __MSDOS__
-	gotoxy(41, wherey()-3);
+	gotoxy(41, wherey()-4);
 	#else
 	printf("\n");
 	#endif
@@ -5681,23 +5770,41 @@ mainMenu:
 	#else
 	printf("\n");
 	#endif
+	#ifdef __MSDOS__
+	printf("9- Number of draws of SuperStars");
+	gotoxy(41, wherey()+1);
+	printf("99-Exit\n");
+	#else
 	printf("9- Exit\n");
+	#endif
 	printf("\nPlease make your selection: ");
 
 keybCommand:
 
+	#ifdef __MSDOS__
+	do {
+		scanf("%d", &keyb);
+	} while(!((keyb >= 0 && keyb < 10) || keyb == 99));
+	#else
 	do {
 		scanf("%d", &keyb);
 	} while(!(keyb >= 0 && keyb < 10));
+	#endif
 
 	clearScreen();
 
 	if (keyb == 0) {
 		goto mainMenu;
 	}
+	#ifdef __MSDOS__
+	else if (keyb == 99) {
+		goto exitProgram;
+	}
+	#else
 	else if (keyb == 9) {
 		goto exitProgram;
 	}
+	#endif
 
 	if ((fp = fopen(outputFile, "w")) == NULL) {
 		printf("Can't open file %s\n", OUTPUTFILE);
@@ -5717,7 +5824,11 @@ keybCommand:
 
 		/* coupon, totalBall, drawBallCount, drawRowCount, drawByNorm, left, blend1, blend2, side, rand, lucky */
 		drawBalls(coupon, TOTAL_BALL, DRAW_BALL, keyb2, 1, 1, 1, 1, 1, 1, 1);
-		printListXYByKey(coupon, fp);
+
+		/* draw super stars */
+		drawBalls(coupon_ss, TOTAL_BALL_SS, 1, keyb2, 1, 1, 1, 1, 1, 1, 1);
+		printListXYWithSSByKey(coupon, coupon_ss, fp);
+		removeAllXY(coupon_ss);
 		removeAllXY(coupon);
 
 	} else if (keyb == 2) {
@@ -5762,6 +5873,14 @@ keybCommand:
 		removeAllXY(luckyBalls4);
 		#endif
 	}
+	#ifdef __MSDOS__
+	else if (keyb == 9) {
+		puts("Number of draws of SuperStars\n");
+		bubbleSortX2ByVal(superStarBallStats, -1);
+		printBallStats(superStarBallStats);
+		printf("\n\n");
+	}
+	#endif
 
 	printf("\nThe results are written to %s file.\n", OUTPUTFILE);
 
@@ -5779,6 +5898,7 @@ exitProgram:
 
 	removeAllXY(winningDrawnBallsList);
 	removeAllX2(winningBallStats);
+	removeAllX2(superStarBallStats);
 
 	return 0;
 }
