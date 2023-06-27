@@ -29,7 +29,7 @@ It allows you to draw a lotto by using the information of the past draws.
 	- **...-win32.exe ...-win64.exe**	: Windows 32 bit and 64 bit executable files. These files were compiled with the gcc compiler on the windows 10 operating system.
 
 
-	- **...-mac**			: macOS executable files. These files were compiled with the gcc compiler on the macOS Mojave 10.14.6 operating system.
+	- **...-mac**			: macOS executable files. These files were compiled with the gcc compiler on the macOS Catalina 10.15.7 operating system.
 
 	- **...-linux**			: Linux executable files. These files were compiled with the gcc compiler on the centOS 7 Linux operating system.
 
@@ -38,7 +38,7 @@ It allows you to draw a lotto by using the information of the past draws.
 
 - **DOS**				: For DOS operating system. 
 
-	- **....EXE**			: MS-DOS executable files. These files were compiled with the 16-bit Borland Turbo C++ compiler on the MS-DOS 4.1 operating system.
+	- **....EXE**			: MS-DOS executable files. These files were compiled with the 16-bit Borland Turbo C++ compiler on the MS-DOS 5.0 operating system.
 
 
 
@@ -49,12 +49,12 @@ It allows you to draw a lotto by using the information of the past draws.
 - gcc 11.2.0 compiler and successfuly tested on
 
 	- Windows 10
-	- macOS Mojave 10.14.6
+	- macOS Catalina 10.15.7
 	- centOS 7 Linux
 
 - Borland Turbo C++ 3.0 compiler and successfuly tested on
 
-	- MS-DOS 4.1
+	- MS-DOS 5.0
 
 
 # HOW TO COMPILE FILES?
