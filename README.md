@@ -64,6 +64,26 @@ It allows you to draw a lotto by using the information of the past draws.
 
 # gausIndex() Function and Pascal's Triangle
 
+```c
+UINT8 gaussIndex(UINT8 ballCount)
+{
+	UINT16 node=0, leftnode=0, level;
+
+	for (level=1; level<ballCount; level++)
+	{
+		if (rand() % 100 < 49 + rand() % 2) {
+			node = node + level;
+		} else {
+			node = node + level + 1;
+		}
+
+		leftnode = leftnode + level;
+	}
+
+	return node - (leftnode-1);
+}
+```
+
 ![alt text](https://github.com/tipirdamaz/hope-merchant/blob/main/screenshots/pascal-triangle.jpg)
 ```
  Figure: Pascal's triangle with 54 nodes
