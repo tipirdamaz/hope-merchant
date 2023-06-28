@@ -62,6 +62,82 @@ It allows you to draw a lotto by using the information of the past draws.
 - **gcc sourcefile.c -o outputfile -lm**
 
 
+# gausIndex() Function and Pascal's Triangle
+
+![alt text](https://github.com/tipirdamaz/hope-merchant/blob/main/screenshots/pascal-triangle.jpg)
+```
+ Figure: Pascal's triangle with 54 nodes
+```
+
+The **gaussIndex** function simulates that a ball dropped at node **0** of Pascal's triangle hits the nodes and moves left or right each time (just like tossing a coin) reaching the base of the triangle and selecting the number at the node it hits at the base.
+
+For example, we have a lotto game with a total of **10** balls in a globe. Let's draw from these 10 balls.
+Let's examine how the **gaussIndex(10)** function works:
+
+A ball dropped at the top node **(0)** of Pascal's triangle falls to the left **(1)** or right **(2)**.
+
+Suppose the ball follows the path **0-1-4-7-12-18**.
+
+Ball hitting knot **18**, It will land on one of the nodes:
+
+	node = node + level = 18 + 6 = 24
+
+or
+
+	node = node + level + 1 = 18 + 6 + 1 = 25
+
+
+Suppose the ball then follows the path **25-32-40-49** and reaches the base of Pascal's triangle.
+
+```
+node - (leftnode-1) = 49 - (45-1) = 5
+```
+**gaussIndex function will return ball number ⑤**
+
+The probability that a ball dropped on node 0 will always go to the left or always to the right is very low.
+Usually the ball lands somewhere in the middle at the base of the triangle.
+If more than one ball fell from above, the balls would pile up in the middle just like in a **normal distribution**.
+Based on data from previous draws, the balls are sorted according to certain sorting orders (with the **ballSortOrder** array) to the base of the triangle.
+The function was named **gaussIndex** because an index of this array is returned.
+
+In the draws we will make, if we want the balls to be drawn mostly from the balls that came out the most in the past draws,
+At the base of the triangle, we should place the balls that appear the most in the middle, and the balls that appear the least on the sides.
+
+
+Let the number of balls appear in past draws be as follows:
+
+- ① => 56
+- ② => 14
+- ③ => 97
+- ④ => 48
+- ⑤ => 27
+- ⑥ => 21
+- ⑦ => 41
+- ⑧ => 33
+- ⑨ => 16
+- ⑩ => 47
+
+If we order the balls according to the normal distribution, that is, the balls that come out the most are in the middle:
+
+- ballSortOrder[0] = ② => 14
+- ballSortOrder[1] = ⑥ => 21
+- ballSortOrder[2] = ⑧ => 33
+- ballSortOrder[3] = ⑩ => 47
+- ballSortOrder[4] = ① => 56
+- ballSortOrder[5] = ③ => 97
+- ballSortOrder[6] = ④ => 48
+- ballSortOrder[7] = ⑦ => 41
+- ballSortOrder[8] = ⑤ => 27
+- ballSortOrder[9] = ⑨ => 16
+
+The gaussIndex function following the path **0-1-4-7-12-18-25-32-40-49**:
+
+```
+index = gaussIndex(10)-1 = 5-1 = 4
+```
+**ballSortOrder[4] = ① will return the ball.**
+
+
 # SCREENSHOTS
 
 ![alt text](https://github.com/tipirdamaz/hope-merchant/blob/main/screenshots/01.png)
