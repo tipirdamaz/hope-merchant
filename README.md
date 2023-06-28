@@ -126,29 +126,29 @@ At the base of the triangle, we should place the balls that appear the most in t
 
 Let the number of balls appear in past draws be as follows:
 
-- ① => 56
-- ② => 14
-- ③ => 97
-- ④ => 48
-- ⑤ => 27
-- ⑥ => 21
-- ⑦ => 41
-- ⑧ => 33
-- ⑨ => 16
-- ⑩ => 47
+- ① => 56 times
+- ② => 14 times
+- ③ => 97 times
+- ④ => 48 times
+- ⑤ => 27 times
+- ⑥ => 21 times
+- ⑦ => 41 times
+- ⑧ => 33 times
+- ⑨ => 16 times
+- ⑩ => 47 times
 
 If we order the balls according to the normal distribution, that is, the balls that come out the most are in the middle:
 
-- ballSortOrder[0] = ② => 14
-- ballSortOrder[1] = ⑥ => 21
-- ballSortOrder[2] = ⑧ => 33
-- ballSortOrder[3] = ⑩ => 47
-- ballSortOrder[4] = ① => 56
-- ballSortOrder[5] = ③ => 97
-- ballSortOrder[6] = ④ => 48
-- ballSortOrder[7] = ⑦ => 41
-- ballSortOrder[8] = ⑤ => 27
-- ballSortOrder[9] = ⑨ => 16
+- ballSortOrder[0] = ② => 14 times
+- ballSortOrder[1] = ⑥ => 21 times
+- ballSortOrder[2] = ⑧ => 33 times
+- ballSortOrder[3] = ⑩ => 47 times
+- ballSortOrder[4] = ① => 56 times
+- ballSortOrder[5] = ③ => 97 times
+- ballSortOrder[6] = ④ => 48 times
+- ballSortOrder[7] = ⑦ => 41 times
+- ballSortOrder[8] = ⑤ => 27 times
+- ballSortOrder[9] = ⑨ => 16 times
 
 The gaussIndex function following the path **0-1-4-7-12-18-25-32-40-49**:
 
