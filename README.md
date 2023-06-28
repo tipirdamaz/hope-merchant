@@ -110,9 +110,9 @@ or
 Suppose the ball then follows the path **25-32-40-49** and reaches the base of Pascal's triangle.
 
 ```
-node - (leftnode-1) = 49 - (45-1) = 5
+gaussIndex(10) = node - (leftnode-1) = 49 - (45-1) = 5
 ```
-**gaussIndex function will return ball number ⑤**
+**gaussIndex(10) will return ball number ⑤**
 
 The probability that a ball dropped on node 0 will always go to the left or always to the right is very low.
 Usually the ball lands somewhere in the middle at the base of the triangle.
@@ -155,7 +155,7 @@ The gaussIndex function following the path **0-1-4-7-12-18-25-32-40-49**:
 ```
 index = gaussIndex(10)-1 = 5-1 = 4
 ```
-**ballSortOrder[4] = ① will return the ball.**
+**ballSortOrder[index] = ballSortOrder[4] = ①**
 
 
 # SCREENSHOTS
