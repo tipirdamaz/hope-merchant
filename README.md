@@ -62,7 +62,7 @@ It allows you to draw a lotto by using the information of the past draws.
 - **gcc sourcefile.c -o outputfile -lm**
 
 
-# gausIndex() Function and Pascal's Triangle
+# gaussIndex() Function and Pascal's Triangle
 
 ```c
 UINT8 gaussIndex(UINT8 ballCount)
