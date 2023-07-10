@@ -10,57 +10,17 @@ This program provides statistics such as how many times the numbers in the previ
 
 It allows you to draw a lotto by using the information of the past draws.
 
+## The fact that some numbers came out a lot in the previous draws does not mean that these numbers will appear more likely in the next draws.
 
-# PACKAGE CONTENTS
+If a statistically infinite number of draws are made, the number of draws of all numbers may be equal.
 
-- **source**				: C source files
+If the numbers that came out a lot in the previous draws were due to a systematic error caused by the machines and the balls, then it may make sense to draw according to the statistics of the past draws.
 
-	- **sayisal.c**			: Turkey Sayisal Lotto
-	- **super.c**			: Turkey Super Lotto
-	- **sanstopu.c**		: Turkey Sans Topu Lotto
-	- **eumillions.c**		: EuroMillions Lotto
-	- **eujackpot.c**		: EuroJackpot Lotto
-	- **powerball.c**		: American PowerBall Lotto
-	- **megamillions.c**		: American MegaMillions Lotto
+For example, in the "Çılgın Sayısal Loto" game which is played by drawing 6 balls out of a total of 90 balls, in two draws made with 5 days apart, if 4 balls reappear due to a systematic error, it may be useful to draw according to the statistics of the past draws.
 
-
-- **dist**
-
-	- **...-win32.exe ...-win64.exe**	: Windows 32 bit and 64 bit executable files. These files were compiled with the gcc compiler on the windows 10 operating system.
-
-
-	- **...-mac**			: macOS executable files. These files were compiled with the gcc compiler on the macOS Catalina 10.15.7 operating system.
-
-	- **...-linux**			: Linux executable files. These files were compiled with the gcc compiler on the centOS 7 Linux operating system.
-
-	- **....txt**			: TXT files are statistics files containing the results of previous draws. These files must be located in the same directory as the executable files.
-
-
-- **DOS**				: For DOS operating system. 
-
-	- **....EXE**			: MS-DOS executable files. These files were compiled with the 16-bit Borland Turbo C++ compiler on the MS-DOS 5.0 operating system.
-
-
-
-# COMPILER AND PLATFORM
-
-### Source files were compiled with 
-
-- gcc 11.2.0 compiler and successfuly tested on
-
-	- Windows 10
-	- macOS Catalina 10.15.7
-	- centOS 7 Linux
-
-- Borland Turbo C++ 3.0 compiler and successfuly tested on
-
-	- MS-DOS 5.0
-
-
-# HOW TO COMPILE FILES?
-
-- **gcc sourcefile.c -o outputfile -lm**
-
+```
+23.11.2020 :  8 22 42 52 55 71        18.11.2020 :  8 22 50 55 71 87       5 days   ( 8,22,55,71)
+```
 
 # gaussIndex() Function and Pascal's Triangle
 
@@ -157,6 +117,56 @@ index = gaussIndex(10)-1 = 5-1 = 4
 ```
 **ballSortOrder[index] = ballSortOrder[4] = ①**
 
+
+# PACKAGE CONTENTS
+
+- **source**				: C source files
+
+	- **sayisal.c**			: Turkey Sayisal Lotto
+	- **super.c**			: Turkey Super Lotto
+	- **sanstopu.c**		: Turkey Sans Topu Lotto
+	- **eumillions.c**		: EuroMillions Lotto
+	- **eujackpot.c**		: EuroJackpot Lotto
+	- **powerball.c**		: American PowerBall Lotto
+	- **megamillions.c**		: American MegaMillions Lotto
+
+
+- **dist**
+
+	- **...-win32.exe ...-win64.exe**	: Windows 32 bit and 64 bit executable files. These files were compiled with the gcc compiler on the windows 10 operating system.
+
+
+	- **...-mac**			: macOS executable files. These files were compiled with the gcc compiler on the macOS Catalina 10.15.7 operating system.
+
+	- **...-linux**			: Linux executable files. These files were compiled with the gcc compiler on the centOS 7 Linux operating system.
+
+	- **....txt**			: TXT files are statistics files containing the results of previous draws. These files must be located in the same directory as the executable files.
+
+
+- **DOS**				: For DOS operating system. 
+
+	- **....EXE**			: MS-DOS executable files. These files were compiled with the 16-bit Borland Turbo C++ compiler on the MS-DOS 5.0 operating system.
+
+
+
+# COMPILER AND PLATFORM
+
+### Source files were compiled with 
+
+- gcc 11.2.0 compiler and successfuly tested on
+
+	- Windows 10
+	- macOS Catalina 10.15.7
+	- centOS 7 Linux
+
+- Borland Turbo C++ 3.0 compiler and successfuly tested on
+
+	- MS-DOS 5.0
+
+
+# HOW TO COMPILE FILES?
+
+- **gcc sourcefile.c -o outputfile -lm**
 
 # SCREENSHOTS
 
