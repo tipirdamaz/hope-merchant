@@ -12,6 +12,8 @@ It allows you to draw a lotto by using the information of the past draws.
 
 ## The fact that some numbers came out a lot in the previous draws does not mean that these numbers will appear more likely in the next draws.
 
+We can't say that after 3 heads in a row in a coin toss, the probability of getting heads is higher on the 4th toss. The probability of heads or tails is always equal on each toss. However, if a large number of tosses are made, the heads and tails numbers converge.
+
 If a statistically infinite number of draws are made, the number of draws of all numbers may be equal.
 
 If the numbers that came out a lot in the previous draws were due to a systematic error caused by the machines and the balls, then it may make sense to draw according to the statistics of the past draws.
